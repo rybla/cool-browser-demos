@@ -7,6 +7,6 @@ export function get_pages(): { name: string; path: string }[] {
     .filter((fp) => fs.statSync(path.join("site", fp)).isDirectory())
     .map((fn) => ({
       name: path.basename(fn),
-      path: path.join(fn),
+      path: fn,
     }));
 }
