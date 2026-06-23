@@ -26,7 +26,7 @@ class SeededRandom {
 }
 
 class ImprovedNoise {
-  private p: number[] = new Array(512);
+  private p: number[] = new Array<number>(512);
   constructor(rng: SeededRandom) {
     const permutation = Array.from({ length: 256 }, (_, i) => i);
     for (let i = 255; i > 0; i--) {
@@ -203,7 +203,7 @@ let simTimeTicks = 0;
 
 let currentWeather: WeatherType = "clear";
 let weatherTimer = 300; // ticks before random change
-let windDirection = rng.range(0, Math.PI * 2);
+let _windDirection = rng.range(0, Math.PI * 2);
 let windSpeed = 3.0; // m/s
 
 let selectedNode: GridNode | null = null;
@@ -382,7 +382,7 @@ function createBirchTree(treeRng: SeededRandom): THREE.Group {
 }
 
 // --- Mountain Spire Model ---
-function createMountainSpire(height: number, mRng: SeededRandom): THREE.Group {
+function createMountainSpire(height: number, _mRng: SeededRandom): THREE.Group {
   const group = new THREE.Group();
 
   // Mountain base - rugged cone
@@ -529,7 +529,7 @@ function buildGlowSheepModel(): {
     { x: -0.25, z: -0.2 }, // Back Right
   ];
 
-  legPositions.forEach((pos, idx) => {
+  legPositions.forEach((pos) => {
     const legPivot = new THREE.Group();
     legPivot.position.set(pos.x, -0.3, pos.z);
 
@@ -854,7 +854,6 @@ function buildAquaSerpentModel(): {
   });
 
   let currentSegmentParent: THREE.Object3D = body;
-  let lastTailMesh: THREE.Object3D = body;
 
   const tailSegments = 3;
   for (let i = 0; i < tailSegments; i++) {
@@ -868,7 +867,6 @@ function buildAquaSerpentModel(): {
     pivot.add(segment);
 
     currentSegmentParent = pivot;
-    lastTailMesh = pivot; // store last for tail reference
   }
 
   // Bio-luminescent tail light tip
@@ -1195,8 +1193,7 @@ function initPlanet() {
     opacity: 0.65,
     roughness: 0.15,
     metalness: 0.1,
-    shininess: 90,
-  } as any); // cast for shininess standard compat
+  });
 
   oceanMesh = new THREE.Mesh(oceanGeo, oceanMat);
   oceanMesh.receiveShadow = true;
@@ -1583,7 +1580,6 @@ function findNearbyPrey(hunter: Creature, range: number): Creature | null {
 }
 
 function findNearbyPredator(prey: Creature, range: number): Creature | null {
-  let closest: THREE.Group | null = null;
   let minDist = Infinity;
   let predatorObj: Creature | null = null;
 
@@ -1599,7 +1595,6 @@ function findNearbyPredator(prey: Creature, range: number): Creature | null {
       const d = getDistance(prey.node, other.node);
       if (d < range && d < minDist) {
         minDist = d;
-        closest = other.model;
         predatorObj = other;
       }
     }
@@ -1620,7 +1615,7 @@ function executeSimulationTick() {
   }
 
   // Weather influence: Wind vectors shift gently
-  windDirection += rng.range(-0.4, 0.4);
+  _windDirection += rng.range(-0.4, 0.4);
   windSpeed = THREE.MathUtils.clamp(windSpeed + rng.range(-1, 1), 1.0, 8.0);
 
   // 1. Grid Nodes Resource Update (Regrowth & moisture dissipation)
@@ -2289,7 +2284,7 @@ function animateFrame() {
   // --- Animate Weather Particle Systems (radial drop or equatorial storm) ---
   if (currentWeather === "rain" && rainParticles) {
     const pos = rainParticles.geometry.attributes.position!;
-    const speeds = rainParticles.userData.speeds;
+    const speeds = rainParticles.userData.speeds as number[];
 
     for (let i = 0; i < pos.count; i++) {
       const px = pos.getX(i);
@@ -2301,7 +2296,7 @@ function animateFrame() {
       dir.normalize();
 
       // Fall radially inwards towards planet center
-      const nextDist = dist - speeds[i] * 20.0 * delta;
+      const nextDist = dist - speeds[i]! * 20.0 * delta;
 
       // Determine ground boundary height
       // Find closest node to calculate terrain height
@@ -2328,7 +2323,7 @@ function animateFrame() {
     pos.needsUpdate = true;
   } else if (currentWeather === "snow" && snowParticles) {
     const pos = snowParticles.geometry.attributes.position!;
-    const speeds = snowParticles.userData.speeds;
+    const speeds = snowParticles.userData.speeds as number[];
 
     for (let i = 0; i < pos.count; i++) {
       const px = pos.getX(i);
@@ -2343,7 +2338,7 @@ function animateFrame() {
       const wobbleX = Math.sin(elapsed * 2.0 + i) * 0.1;
       const wobbleZ = Math.cos(elapsed * 2.0 + i) * 0.1;
 
-      const nextDist = dist - speeds[i] * 10.0 * delta;
+      const nextDist = dist - speeds[i]! * 10.0 * delta;
 
       if (nextDist <= PLANET_RADIUS + 0.1) {
         const resetDir = new THREE.Vector3(
@@ -2370,21 +2365,22 @@ function animateFrame() {
     pos.needsUpdate = true;
   } else if (currentWeather === "sandstorm" && stormParticles) {
     const pos = stormParticles.geometry.attributes.position!;
-    const angles = stormParticles.userData.angles;
-    const heights = stormParticles.userData.heights;
-    const radii = stormParticles.userData.radii;
+    const angles = stormParticles.userData.angles as number[];
+    const heights = stormParticles.userData.heights as number[];
+    const radii = stormParticles.userData.radii as number[];
+    const rotSpeed = stormParticles.userData.rotSpeed as number;
 
     for (let i = 0; i < pos.count; i++) {
       // Swirl around the Y axis
-      angles[i] += stormParticles.userData.rotSpeed * delta;
+      angles[i] = angles[i]! + rotSpeed * delta;
 
       // Turbulence wobbles height & radius
       const yWobble = Math.sin(elapsed * 4.0 + i) * 0.1;
 
-      const r = radii[i] + Math.sin(elapsed * 2.0 + i) * 0.08;
-      const x = Math.cos(angles[i]) * r;
-      const z = Math.sin(angles[i]) * r;
-      const y = heights[i] + yWobble;
+      const r = radii[i]! + Math.sin(elapsed * 2.0 + i) * 0.08;
+      const x = Math.cos(angles[i]!) * r;
+      const z = Math.sin(angles[i]!) * r;
+      const y = heights[i]! + yWobble;
 
       pos.setXYZ(i, x, y, z);
     }
@@ -2434,9 +2430,6 @@ function animateFrame() {
         }
       } else {
         // Interpolating position coordinates
-        const posA = c.node.actualPosition;
-        const posB = c.targetNode.actualPosition;
-
         const currentDir = new THREE.Vector3()
           .lerpVectors(c.node.position, c.targetNode.position, c.moveProgress)
           .normalize();
@@ -2536,12 +2529,12 @@ function initEventHandlers() {
   const canvas = document.getElementById("canvas")!;
 
   // Mouse Drag rotation
-  canvas.addEventListener("mousedown", (e: any) => {
+  canvas.addEventListener("mousedown", (e: MouseEvent) => {
     isDragging = true;
     previousMousePosition = { x: e.clientX, y: e.clientY };
   });
 
-  canvas.addEventListener("mousemove", (e: any) => {
+  canvas.addEventListener("mousemove", (e: MouseEvent) => {
     if (!isDragging) return;
     const deltaX = e.clientX - previousMousePosition.x;
     const deltaY = e.clientY - previousMousePosition.y;
@@ -2561,14 +2554,14 @@ function initEventHandlers() {
   });
 
   // Mouse Wheel Zoom
-  canvas.addEventListener("wheel", (e: any) => {
+  canvas.addEventListener("wheel", (e: WheelEvent) => {
     cameraRadius += e.deltaY * 0.025;
     cameraRadius = THREE.MathUtils.clamp(cameraRadius, 20.0, 70.0);
     updateCamera();
   });
 
   // Raycasting click selection
-  canvas.addEventListener("click", (e: any) => {
+  canvas.addEventListener("click", (e: MouseEvent) => {
     // Avoid registration during rotation drag drags
     if (isDragging) return;
 
