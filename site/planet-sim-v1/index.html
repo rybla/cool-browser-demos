@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BioSphere-3D | Interactive Planet Ecosystem Simulation</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <!-- 3D Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Brand Header -->
+    <div id="hud-header">
+      <div class="brand">
+        <h1>BIOSPHERE-3D</h1>
+        <span class="brand-badge">Simulation v1.0</span>
+      </div>
+    </div>
+
+    <!-- Left Stats HUD Panel -->
+    <div id="hud-left" class="hud-panel">
+      <!-- Simulation Controls -->
+      <div class="panel-section">
+        <h2 class="section-title">Time Control</h2>
+        <div class="controls-group">
+          <button id="btn-play" class="btn active">Play</button>
+          <button id="btn-pause" class="btn">Pause</button>
+        </div>
+        <div class="controls-group">
+          <button id="btn-speed-1x" class="btn active">1x</button>
+          <button id="btn-speed-2x" class="btn">2x</button>
+          <button id="btn-speed-4x" class="btn">4x</button>
+        </div>
+      </div>
+
+      <!-- Populations -->
+      <div class="panel-section">
+        <h2 class="section-title">Species Population</h2>
+        <div
+          id="species-list"
+          style="display: flex; flex-direction: column; gap: 8px"
+        >
+          <!-- Populations are filled dynamically by index.tsx -->
+          <div class="stat-row">
+            <span class="stat-label"
+              ><span
+                class="stat-color-dot"
+                style="background-color: #38bdf8"
+              ></span
+              >Aqua-Serpent</span
+            >
+            <span id="pop-serpent" class="stat-val">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label"
+              ><span
+                class="stat-color-dot"
+                style="background-color: #a855f7"
+              ></span
+              >Glow-Sheep</span
+            >
+            <span id="pop-sheep" class="stat-val">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label"
+              ><span
+                class="stat-color-dot"
+                style="background-color: #ef4444"
+              ></span
+              >Spike-Stalker</span
+            >
+            <span id="pop-stalker" class="stat-val">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label"
+              ><span
+                class="stat-color-dot"
+                style="background-color: #eab308"
+              ></span
+              >Dust-Scarab</span
+            >
+            <span id="pop-scarab" class="stat-val">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label"
+              ><span
+                class="stat-color-dot"
+                style="background-color: #f43f5e"
+              ></span
+              >Sky-Scythe</span
+            >
+            <span id="pop-scythe" class="stat-val">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reset and Controls -->
+      <div class="panel-section">
+        <h2 class="section-title">Ecosystem Reset</h2>
+        <button id="btn-restart" class="btn btn-danger">
+          Restart Simulation
+        </button>
+      </div>
+
+      <!-- Controls Hint -->
+      <div class="shortcuts-hint">
+        <strong>Controls:</strong><br />
+        • Drag with mouse to Rotate Planet<br />
+        • Scroll to Zoom in/out<br />
+        • Click on Planet surface to inspect tiles<br />
+        • Press <strong>R</strong> to restart with a new seed
+      </div>
+    </div>
+
+    <!-- Right Settings & Weather HUD Panel -->
+    <div id="hud-right" class="hud-panel">
+      <!-- Weather System -->
+      <div class="panel-section">
+        <h2 class="section-title">Weather System</h2>
+        <div class="weather-status">
+          <div class="weather-indicator">
+            <div style="font-size: 11px; color: var(--text-muted)">
+              Condition
+            </div>
+            <div id="weather-condition" class="weather-val">Sunny</div>
+          </div>
+          <div class="weather-indicator">
+            <div style="font-size: 11px; color: var(--text-muted)">
+              Wind Speed
+            </div>
+            <div id="weather-wind" class="weather-val">3 m/s</div>
+          </div>
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+          "
+        >
+          <div style="font-size: 12px; color: var(--text-muted)">
+            Trigger Local Weather:
+          </div>
+          <div class="controls-group">
+            <button id="btn-trigger-rain" class="btn">Rain</button>
+            <button id="btn-trigger-snow" class="btn">Snow</button>
+            <button id="btn-trigger-storm" class="btn">Sandstorm</button>
+          </div>
+          <button id="btn-clear-weather" class="btn" style="font-size: 11px">
+            Clear All Weather
+          </button>
+        </div>
+      </div>
+
+      <!-- Inspector Panel -->
+      <div class="panel-section">
+        <h2 class="section-title">Tile Inspector</h2>
+        <div
+          id="inspector-placeholder"
+          style="
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px 0;
+          "
+        >
+          Click on the planet to inspect a tile.
+        </div>
+        <div
+          id="inspector-content"
+          class="inspector-detail"
+          style="display: none"
+        >
+          <div class="detail-row">
+            <span>Biome</span>
+            <span id="inspect-biome" style="font-weight: bold">-</span>
+          </div>
+          <div class="detail-row">
+            <span>Elevation</span>
+            <span id="inspect-elevation">-</span>
+          </div>
+          <div class="detail-row">
+            <span>Moisture</span>
+            <span id="inspect-moisture">-</span>
+          </div>
+          <div class="detail-row">
+            <span>Temperature</span>
+            <span id="inspect-temperature">-</span>
+          </div>
+          <div class="detail-row">
+            <span>Vegetation</span>
+            <span id="inspect-vegetation">-</span>
+          </div>
+          <div class="detail-row">
+            <span>Occupant</span>
+            <span id="inspect-occupant">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulation Logs -->
+      <div class="panel-section">
+        <h2 class="section-title">Simulation Feed</h2>
+        <div
+          id="sim-feed"
+          style="
+            font-size: 11px;
+            height: 120px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+          "
+        >
+          <div>Simulation initialized.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Navigation Tooltip -->
+    <div class="interactive-hint">
+      <span class="hint-dot"></span>
+      <span>Drag to Rotate Planet | Click to Inspect</span>
+    </div>
+
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
