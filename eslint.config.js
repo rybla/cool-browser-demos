@@ -92,8 +92,8 @@ export default defineConfig([
     rules: {
       ...eslintCss.configs.recommended.rules,
       "css/no-invalid-properties": ["error", { allowUnknownVariables: true }],
-      "css/no-important": "warn",
-      "css/use-baseline": "warn",
+      "css/no-important": "off",
+      "css/use-baseline": "off",
     },
   },
 ]);
