@@ -12,6 +12,6 @@ for (const page of pages) {
   const anchor = document.createElement("a");
   item.appendChild(anchor);
   anchor.classList.add("page-anchor");
-  anchor.href = page.path;
+  anchor.href = `./${page.path}`;
   anchor.innerText = page.name;
 }
