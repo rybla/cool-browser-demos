@@ -480,6 +480,240 @@ export const SYSTEMS: { [systemKey: string]: SystemConfig } = {
           };
         },
       },
+      {
+        name: "Commutation Cascade (3γ × 3δ)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 210,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "g2",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 140,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "g3",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 70,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "d1",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 290,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "d2",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 360,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "d3",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 430,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "fg1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 40,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fg2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 40,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fg3",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 140,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fg4",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 210,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fd1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 460,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fd2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 460,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fd3",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 360,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "fd4",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 290,
+                vx: 0,
+                vy: 0,
+              },
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "d1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g12",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "g2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g23",
+                fromNodeId: "g2",
+                fromPortIndex: 1,
+                toNodeId: "g3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g3_f1",
+                fromNodeId: "g3",
+                fromPortIndex: 1,
+                toNodeId: "fg1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g3_f2",
+                fromNodeId: "g3",
+                fromPortIndex: 2,
+                toNodeId: "fg2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g2_f",
+                fromNodeId: "g2",
+                fromPortIndex: 2,
+                toNodeId: "fg3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_g1_f",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "fg4",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d12",
+                fromNodeId: "d1",
+                fromPortIndex: 1,
+                toNodeId: "d2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d23",
+                fromNodeId: "d2",
+                fromPortIndex: 1,
+                toNodeId: "d3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d3_f1",
+                fromNodeId: "d3",
+                fromPortIndex: 1,
+                toNodeId: "fd1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d3_f2",
+                fromNodeId: "d3",
+                fromPortIndex: 2,
+                toNodeId: "fd2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d2_f",
+                fromNodeId: "d2",
+                fromPortIndex: 2,
+                toNodeId: "fd3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_d1_f",
+                fromNodeId: "d1",
+                fromPortIndex: 2,
+                toNodeId: "fd4",
+                toPortIndex: 0,
+              },
+            ],
+          };
+        },
+      },
     ],
   },
   arithmetic: {
@@ -801,6 +1035,409 @@ export const SYSTEMS: { [systemKey: string]: SystemConfig } = {
           };
         },
       },
+      {
+        name: "Addition: 5 + 5 = 10",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "add",
+                type: "cell",
+                symbol: "Add",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              // Number 5 (S1 -> S2 -> S3 -> S4 -> S5 -> Z1)
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 200,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 170,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 140,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s4",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 110,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s5",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 80,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "z1",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 50,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              // Number 5 (sa -> sb -> sc -> sd -> se -> z2)
+              {
+                id: "sa",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 300,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "sb",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 330,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "sc",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 360,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "sd",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 390,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "se",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 420,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 450,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              // Output
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 300,
+                vx: 0,
+                vy: 0,
+              },
+            ],
+            wires: [
+              {
+                id: "w_add_p",
+                fromNodeId: "add",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s2_s3",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s3_s4",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "s4",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s4_s5",
+                fromNodeId: "s4",
+                fromPortIndex: 1,
+                toNodeId: "s5",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s5_z1",
+                fromNodeId: "s5",
+                fromPortIndex: 1,
+                toNodeId: "z1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_add_a1",
+                fromNodeId: "add",
+                fromPortIndex: 1,
+                toNodeId: "sa",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sa_sb",
+                fromNodeId: "sa",
+                fromPortIndex: 1,
+                toNodeId: "sb",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sb_sc",
+                fromNodeId: "sb",
+                fromPortIndex: 1,
+                toNodeId: "sc",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sc_sd",
+                fromNodeId: "sc",
+                fromPortIndex: 1,
+                toNodeId: "sd",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sd_se",
+                fromNodeId: "sd",
+                fromPortIndex: 1,
+                toNodeId: "se",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_se_z2",
+                fromNodeId: "se",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_add_a2",
+                fromNodeId: "add",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0,
+              },
+            ],
+          };
+        },
+      },
+      {
+        name: "Multiplication: 3 × 2 = 6",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "mul",
+                type: "cell",
+                symbol: "Mul",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              // Multiplier 3 (s1 -> s2 -> s3 -> z1)
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 200,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 150,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "z1",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 50,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              // Multiplicand 2 (sa -> sb -> z2)
+              {
+                id: "sa",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 300,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "sb",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 350,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 400,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              // Output
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 300,
+                vx: 0,
+                vy: 0,
+              },
+            ],
+            wires: [
+              {
+                id: "w_mul_p",
+                fromNodeId: "mul",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s2_s3",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_s3_z1",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "z1",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_mul_a1",
+                fromNodeId: "mul",
+                fromPortIndex: 1,
+                toNodeId: "sa",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sa_sb",
+                fromNodeId: "sa",
+                fromPortIndex: 1,
+                toNodeId: "sb",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_sb_z2",
+                fromNodeId: "sb",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_mul_a2",
+                fromNodeId: "mul",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0,
+              },
+            ],
+          };
+        },
+      },
     ],
   },
   logic: {
@@ -983,6 +1620,407 @@ export const SYSTEMS: { [systemKey: string]: SystemConfig } = {
                 fromNodeId: "and_gate",
                 fromPortIndex: 2,
                 toNodeId: "out",
+                toPortIndex: 0,
+              },
+            ],
+          };
+        },
+      },
+      {
+        name: "Full Half Adder (XOR & AND)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "true_a",
+                type: "cell",
+                symbol: "True",
+                x: 150,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "true_b",
+                type: "cell",
+                symbol: "True",
+                x: 350,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "dup_a",
+                type: "cell",
+                symbol: "D",
+                x: 150,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "dup_b",
+                type: "cell",
+                symbol: "D",
+                x: 350,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "or_gate",
+                type: "cell",
+                symbol: "Or",
+                x: 200,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "and_carry",
+                type: "cell",
+                symbol: "And",
+                x: 300,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "dup_carry",
+                type: "cell",
+                symbol: "D",
+                x: 300,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "not_gate",
+                type: "cell",
+                symbol: "Not",
+                x: 250,
+                y: 410,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "and_sum",
+                type: "cell",
+                symbol: "And",
+                x: 200,
+                y: 480,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "sum_out",
+                type: "free",
+                symbol: "Free",
+                x: 200,
+                y: 560,
+                vx: 0,
+                vy: 0,
+              },
+              {
+                id: "carry_out",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 560,
+                vx: 0,
+                vy: 0,
+              },
+            ],
+            wires: [
+              {
+                id: "w_a_dup",
+                fromNodeId: "true_a",
+                fromPortIndex: 0,
+                toNodeId: "dup_a",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_b_dup",
+                fromNodeId: "true_b",
+                fromPortIndex: 0,
+                toNodeId: "dup_b",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupa_or",
+                fromNodeId: "dup_a",
+                fromPortIndex: 1,
+                toNodeId: "or_gate",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupa_and",
+                fromNodeId: "dup_a",
+                fromPortIndex: 2,
+                toNodeId: "and_carry",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupb_or",
+                fromNodeId: "dup_b",
+                fromPortIndex: 1,
+                toNodeId: "or_gate",
+                toPortIndex: 1,
+              },
+              {
+                id: "w_dupb_and",
+                fromNodeId: "dup_b",
+                fromPortIndex: 2,
+                toNodeId: "and_carry",
+                toPortIndex: 1,
+              },
+              {
+                id: "w_or_andsum",
+                fromNodeId: "or_gate",
+                fromPortIndex: 2,
+                toNodeId: "and_sum",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_andcarry_dupcarry",
+                fromNodeId: "and_carry",
+                fromPortIndex: 2,
+                toNodeId: "dup_carry",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupcarry_carryout",
+                fromNodeId: "dup_carry",
+                fromPortIndex: 1,
+                toNodeId: "carry_out",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupcarry_not",
+                fromNodeId: "dup_carry",
+                fromPortIndex: 2,
+                toNodeId: "not_gate",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_not_andsum",
+                fromNodeId: "not_gate",
+                fromPortIndex: 1,
+                toNodeId: "and_sum",
+                toPortIndex: 1,
+              },
+              {
+                id: "w_andsum_out",
+                fromNodeId: "and_sum",
+                fromPortIndex: 2,
+                toNodeId: "sum_out",
+                toPortIndex: 0,
+              },
+            ],
+          };
+        },
+      },
+      {
+        name: "De Morgan's Proof: ~A && ~B = ~(A || B)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "true_a",
+                type: "cell",
+                symbol: "True",
+                x: 150,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "false_b",
+                type: "cell",
+                symbol: "False",
+                x: 350,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2,
+              },
+              {
+                id: "dup_a",
+                type: "cell",
+                symbol: "D",
+                x: 150,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "dup_b",
+                type: "cell",
+                symbol: "D",
+                x: 350,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              // LHS
+              {
+                id: "or_lhs",
+                type: "cell",
+                symbol: "Or",
+                x: 200,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "not_lhs",
+                type: "cell",
+                symbol: "Not",
+                x: 200,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "lhs_out",
+                type: "free",
+                symbol: "Free",
+                x: 200,
+                y: 420,
+                vx: 0,
+                vy: 0,
+              },
+              // RHS
+              {
+                id: "not_a",
+                type: "cell",
+                symbol: "Not",
+                x: 300,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "not_b",
+                type: "cell",
+                symbol: "Not",
+                x: 400,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "and_rhs",
+                type: "cell",
+                symbol: "And",
+                x: 350,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2,
+              },
+              {
+                id: "rhs_out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 420,
+                vx: 0,
+                vy: 0,
+              },
+            ],
+            wires: [
+              {
+                id: "w_a_dup",
+                fromNodeId: "true_a",
+                fromPortIndex: 0,
+                toNodeId: "dup_a",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_b_dup",
+                fromNodeId: "false_b",
+                fromPortIndex: 0,
+                toNodeId: "dup_b",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupa_or_lhs",
+                fromNodeId: "dup_a",
+                fromPortIndex: 1,
+                toNodeId: "or_lhs",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupb_or_lhs",
+                fromNodeId: "dup_b",
+                fromPortIndex: 1,
+                toNodeId: "or_lhs",
+                toPortIndex: 1,
+              },
+              {
+                id: "w_or_not_lhs",
+                fromNodeId: "or_lhs",
+                fromPortIndex: 2,
+                toNodeId: "not_lhs",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_not_lhs_out",
+                fromNodeId: "not_lhs",
+                fromPortIndex: 1,
+                toNodeId: "lhs_out",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupa_not_a",
+                fromNodeId: "dup_a",
+                fromPortIndex: 2,
+                toNodeId: "not_a",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_dupb_not_b",
+                fromNodeId: "dup_b",
+                fromPortIndex: 2,
+                toNodeId: "not_b",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_nota_and_rhs",
+                fromNodeId: "not_a",
+                fromPortIndex: 1,
+                toNodeId: "and_rhs",
+                toPortIndex: 0,
+              },
+              {
+                id: "w_notb_and_rhs",
+                fromNodeId: "not_b",
+                fromPortIndex: 1,
+                toNodeId: "and_rhs",
+                toPortIndex: 1,
+              },
+              {
+                id: "w_and_rhs_out",
+                fromNodeId: "and_rhs",
+                fromPortIndex: 2,
+                toNodeId: "rhs_out",
                 toPortIndex: 0,
               },
             ],
@@ -1830,6 +2868,7 @@ export class InteractionPlayground {
   private panX: number = 0;
   private panY: number = 0;
   private zoom: number = 1.0;
+  private hasManuallyPannedOrZoomed: boolean = false;
   private startDragX: number = 0;
   private startDragY: number = 0;
 
@@ -1966,6 +3005,7 @@ export class InteractionPlayground {
       "btn-auto-center"
     ) as HTMLButtonElement;
     btnCenter.addEventListener("click", () => {
+      this.hasManuallyPannedOrZoomed = false;
       this.centerNet();
     });
 
@@ -1984,6 +3024,13 @@ export class InteractionPlayground {
     this.svg.addEventListener("mousemove", (e) => this.onSvgMouseMove(e));
     this.svg.addEventListener("mouseup", () => this.onSvgMouseUp());
     this.svg.addEventListener("wheel", (e) => this.onSvgWheel(e));
+
+    // 12. Window Resize Handler
+    window.addEventListener("resize", () => {
+      if (!this.hasManuallyPannedOrZoomed) {
+        this.centerNet();
+      }
+    });
   }
 
   // System Changing Handler
@@ -2278,6 +3325,7 @@ export class InteractionPlayground {
     } else if (this.isPanning) {
       this.panX = e.clientX - this.startDragX;
       this.panY = e.clientY - this.startDragY;
+      this.hasManuallyPannedOrZoomed = true;
       this.updateViewportTransform();
     }
   }
@@ -2362,11 +3410,17 @@ export class InteractionPlayground {
     // Refactor pan to keep cursor focused at same spot
     this.panX = mx - cx * this.zoom;
     this.panY = my - cy * this.zoom;
+    this.hasManuallyPannedOrZoomed = true;
 
     this.updateViewportTransform();
   }
 
   private updateViewportTransform() {
+    if (isNaN(this.panX) || isNaN(this.panY) || isNaN(this.zoom)) {
+      this.panX = 0;
+      this.panY = 0;
+      this.zoom = 1.0;
+    }
     this.transformGroup.setAttribute(
       "transform",
       `translate(${this.panX}, ${this.panY}) scale(${this.zoom})`
@@ -2654,8 +3708,14 @@ export class InteractionPlayground {
     const netCenterY = minY + netHeight / 2;
 
     const svgRect = this.svg.getBoundingClientRect();
-    const svgW = svgRect.width;
-    const svgH = svgRect.height;
+    let svgW = svgRect.width;
+    let svgH = svgRect.height;
+
+    if (svgW === 0 || svgH === 0) {
+      svgW = this.svg.clientWidth || this.svg.parentElement?.clientWidth || 800;
+      svgH =
+        this.svg.clientHeight || this.svg.parentElement?.clientHeight || 600;
+    }
 
     // Apply padding
     const padding = 100;
@@ -2802,10 +3862,17 @@ export class InteractionPlayground {
           "path"
         );
         path.setAttribute("class", `wire-path ${wire.isRedex ? "active" : ""}`);
-        path.setAttribute(
-          "d",
-          `M ${p1.x} ${p1.y} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`
-        );
+
+        if (isNaN(p1.x) || isNaN(p1.y) || isNaN(p2.x) || isNaN(p2.y)) {
+          // Skip drawing if endpoints are NaN
+          return;
+        }
+        const dAttr =
+          isNaN(cp1x) || isNaN(cp1y) || isNaN(cp2x) || isNaN(cp2y)
+            ? `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`
+            : `M ${p1.x} ${p1.y} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
+
+        path.setAttribute("d", dAttr);
         path.setAttribute("data-wire-id", wire.id);
 
         this.wiresGroup.appendChild(path);
@@ -2851,7 +3918,10 @@ export class InteractionPlayground {
       } else {
         // Cell Node
         const sym = system.symbols[node.symbol]!;
-        const theta = node.angle ?? -Math.PI / 2;
+        const theta =
+          node.angle !== undefined && !isNaN(node.angle)
+            ? node.angle
+            : -Math.PI / 2;
 
         if (sym.arity > 0) {
           // Draw Oriented Triangle
