@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./index.css" />
+    <title>Interaction Nets Playground</title>
+  </head>
+  <body>
+    <div id="ui-panel">
+      <h1>Interaction Nets</h1>
+      <div class="controls">
+        <button id="add-con">Add Con (γ)</button>
+        <button id="add-dup">Add Dup (δ)</button>
+        <button id="add-era">Add Era (ε)</button>
+        <button id="clear">Clear Graph</button>
+      </div>
+      <div class="controls">
+        <button id="step-btn">Step Rewrite</button>
+        <button id="play-btn">Play Autorewrite</button>
+      </div>
+      <div class="status" id="status-display">Idle</div>
+      <div class="instructions">
+        <p><b>Click</b> a node to select it for connection.</p>
+        <p><b>Select two nodes</b> to connect their open ports.</p>
+        <p><i>Principal ports (★) must connect to interact.</i></p>
+      </div>
+    </div>
+    <div id="graph-container"></div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
