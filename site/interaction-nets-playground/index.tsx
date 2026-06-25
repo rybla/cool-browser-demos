@@ -119,6 +119,7 @@ function removeAgent(agentId: string) {
 }
 
 function updateGraph() {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call -- force-graph is untyped
   Graph.graphData({ nodes: agents, links: wires });
 }
 
@@ -219,7 +220,8 @@ function drawAgent(
   ctx.restore();
 }
 
-function linkColor(link: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- force-graph signature
+function linkColor(_link: any) {
   return "#666";
 }
 
@@ -227,12 +229,15 @@ let selectedPort: string | null = null;
 let selectedNodeId: string | null = null;
 
 // Initialize ForceGraph
-// @ts-ignore
-const Graph = ForceGraph()(graphContainer)
-  .graphData({ nodes: agents, links: wires })
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- force-graph is untyped
+const Graph: any = (ForceGraph as any)()(graphContainer);
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any -- force-graph is untyped */
+Graph.graphData({ nodes: agents, links: wires })
   .nodeId("id")
-  .nodeCanvasObject((node: any, ctx: any, globalScale: any) =>
-    drawAgent(node as Agent, ctx, globalScale)
+  .nodeCanvasObject(
+    (node: any, ctx: CanvasRenderingContext2D, globalScale: number) =>
+      drawAgent(node as Agent, ctx, globalScale)
   )
   .linkColor(linkColor)
   .linkWidth(2)
@@ -445,10 +450,11 @@ async function stepRewrite(): Promise<boolean> {
 }
 
 stepBtn.addEventListener("click", () => {
-  stepRewrite();
+  stepRewrite().catch(console.error);
 });
 
 let isPlaying = false;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises -- Expected for async event listeners
 playBtn.addEventListener("click", async () => {
   if (isPlaying) {
     isPlaying = false;
