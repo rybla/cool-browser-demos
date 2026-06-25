@@ -23,6 +23,7 @@
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.19.3",
     "@dimforge/rapier3d-compat": "^0.19.3",
+    "force-graph": "^1.51.4",
     "three": "^0.184.0"
   }
 }

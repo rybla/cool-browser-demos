@@ -10,4 +10,5 @@ await Bun.build({
   compile: true,
   entrypoints,
   outdir: "dist",
+  root: "site",
 });
