@@ -3,10 +3,295 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>λ-Graph | Interactive Lambda Calculus Visualizer</title>
+    <meta
+      name="description"
+      content="An interactive visual simulator for lambda-calculus reduction using force-directed graphs and step-by-step beta-reduction animations."
+    />
+
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="./index.css" />
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <div class="app-container">
+      <!-- Sidebar Control Panel -->
+      <aside class="sidebar">
+        <!-- Brand Header -->
+        <div class="brand">
+          <div class="brand-logo">
+            <svg
+              viewBox="0 0 100 100"
+              width="32"
+              height="32"
+              class="glowing-lambda"
+            >
+              <defs>
+                <linearGradient
+                  id="logo-grad"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stop-color="#8b5cf6" />
+                  <stop offset="100%" stop-color="#ec4899" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              <path
+                d="M30,80 L55,45 L40,20 L55,20 L65,40 L80,80 L68,80 L60,48 L42,80 Z"
+                fill="url(#logo-grad)"
+                filter="url(#glow)"
+              />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>λ-Graph</h1>
+            <span>Lambda Calculus Visualizer</span>
+          </div>
+        </div>
+
+        <!-- Section: Example Presets -->
+        <div class="panel-section">
+          <label class="section-title" for="preset-select"
+            >Interactive Presets</label
+          >
+          <div class="select-wrapper">
+            <select id="preset-select">
+              <option value="" disabled selected>
+                Select an example program...
+              </option>
+              <option value="identity">Identity Term: λx. x</option>
+              <option value="mockingbird">Mockingbird: λx. x x</option>
+              <option value="beta_demo">
+                Beta-Reduction Demo: (λx. x x) (λy. y)
+              </option>
+              <option value="k_comb">K-Combinator: λx. λy. x</option>
+              <option value="s_comb">
+                S-Combinator: λx. λy. λz. (x z) (y z)
+              </option>
+              <option value="omega">
+                Omega (Infinite Loop): (λx. x x) (λx. x x)
+              </option>
+              <option value="church_two">
+                Church Numeral 2: λf. λx. f (f x)
+              </option>
+              <option value="succ_one">
+                Successor of 1: (λn. λf. λx. f (n f x)) (λf. λx. f x)
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section: Custom Term Input -->
+        <div class="panel-section">
+          <div class="input-header">
+            <label class="section-title" for="term-input"
+              >Lambda Term Input</label
+            >
+            <span id="parse-status" class="status-badge state-idle">Empty</span>
+          </div>
+          <textarea
+            id="term-input"
+            placeholder="e.g., (lambda x . (x x)) (lambda y . y)"
+            spellcheck="false"
+          ></textarea>
+          <div class="syntax-guide">
+            Syntax: <code>x</code>, <code>(lambda x . M)</code>,
+            <code>(M N)</code>, <code>\x.M</code>, <code>λx.M</code>
+          </div>
+        </div>
+
+        <!-- Section: Settings -->
+        <div class="panel-section">
+          <label class="section-title">Reduction Configuration</label>
+
+          <div class="settings-grid">
+            <div class="setting-item">
+              <span class="setting-label">Strategy</span>
+              <div class="select-wrapper compact">
+                <select id="strategy-select">
+                  <option value="normal" selected>
+                    Normal Order (Outermost)
+                  </option>
+                  <option value="applicative">
+                    Applicative Order (Innermost)
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-label">Speed</span>
+              <div class="slider-container">
+                <input
+                  type="range"
+                  id="speed-slider"
+                  min="0.25"
+                  max="3"
+                  step="0.25"
+                  value="1"
+                />
+                <span id="speed-display">1.0x</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Controls -->
+        <div class="panel-section controls-section">
+          <button
+            id="step-btn"
+            class="btn btn-secondary"
+            title="Perform one beta-reduction step"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polygon
+                points="5 4 15 12 5 20 5 4"
+                fill="currentColor"
+              ></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
+            Step
+          </button>
+
+          <button
+            id="normalize-btn"
+            class="btn btn-primary"
+            title="Fully normalize the term with animations"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polygon
+                points="6 4 20 12 6 20 6 4"
+                fill="currentColor"
+              ></polygon>
+            </svg>
+            Normalize
+          </button>
+
+          <button
+            id="reset-btn"
+            class="btn btn-danger"
+            title="Reset term to initial state"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
+              <path
+                d="M22 11.5A10 10 0 0 0 3.2 7.2L2.5 8M2 12.5a10 10 0 0 0 18.8 4.3l.7-0.8"
+              ></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+
+        <!-- Section: Execution Trace History -->
+        <div class="panel-section flex-grow">
+          <label class="section-title">Reduction Trace</label>
+          <div id="trace-container" class="trace-box">
+            <div class="trace-empty">No trace active</div>
+          </div>
+        </div>
+
+        <!-- Section: Color Legend -->
+        <div class="panel-section legend-section">
+          <label class="section-title">Visual Legend</label>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-color node-lambda"></span>
+              <span class="legend-label">Lambda Node (λx)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color node-app"></span>
+              <span class="legend-label">Application (@)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color node-var"></span>
+              <span class="legend-label">Free Variable</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color link-ast"></span>
+              <span class="legend-label">AST Parent-Child</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color link-var"></span>
+              <span class="legend-label">Variable Binder link</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Visualizer Area -->
+      <main class="visualizer-main">
+        <!-- Floating Active Step Card -->
+        <div id="info-card" class="floating-info hidden">
+          <div class="info-header">
+            <h3>Beta-Reduction Active</h3>
+            <button id="close-info" class="close-btn">&times;</button>
+          </div>
+          <p id="info-desc">
+            Substituting argument into bound variable locations...
+          </p>
+        </div>
+
+        <!-- Interactive Force-Graph Container -->
+        <div id="graph-container"></div>
+
+        <!-- Floating Camera & Engine Controls -->
+        <div class="camera-controls">
+          <button id="zoom-in-btn" class="camera-btn" title="Zoom In">+</button>
+          <button id="zoom-out-btn" class="camera-btn" title="Zoom Out">
+            &minus;
+          </button>
+          <button
+            id="zoom-fit-btn"
+            class="camera-btn"
+            title="Recenter & Fit View"
+          >
+            Fit
+          </button>
+          <button
+            id="physics-btn"
+            class="camera-btn text-btn"
+            title="Toggle force physics simulation"
+          >
+            Freeze
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- Bundled Logic Module -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
