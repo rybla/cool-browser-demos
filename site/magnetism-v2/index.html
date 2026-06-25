@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Quantum Flux 2D: Magnetic Field Sandbox</title>
+    <meta
+      name="description"
+      content="An interactive, physically accurate 2D magnetism simulation and sandbox demo using Three.js"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <!-- Canvas for Three.js rendering -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Overlay HUD UI -->
+    <div id="ui-container">
+      <!-- Top HUD Header -->
+      <header id="hud-header">
+        <div class="logo">
+          <span class="logo-glow"></span>
+          <h1>QUANTUM FLUX 2D</h1>
+          <span class="subtitle">PHYSICS SANDBOX</span>
+        </div>
+        <div class="stats-panel">
+          <div class="stat-item">
+            <span class="stat-label">Objects</span>
+            <span id="stat-count" class="stat-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Filings</span>
+            <span id="stat-filings" class="stat-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Energy</span>
+            <span id="stat-energy" class="stat-val">0.00 J</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">FPS</span>
+            <span id="stat-fps" class="stat-val">60</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Sidebar Controls -->
+      <aside id="sidebar">
+        <!-- Presets Section -->
+        <div class="sidebar-section">
+          <h2>Presets & Scenarios</h2>
+          <div class="select-wrapper">
+            <select id="preset-select">
+              <option value="empty">Empty Sandbox</option>
+              <option value="attract-repel">Attraction & Repulsion</option>
+              <option value="wire-field">Current & Wire Field</option>
+              <option value="magnetic-chain">Ferromagnetic Chains</option>
+              <option value="solenoid">Solenoid Coil Loop</option>
+              <option value="iron-filings-demo">Filing Alignment</option>
+              <option value="chaos-sandbox">Chaos Sandbox</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Creator Toolbox -->
+        <div class="sidebar-section">
+          <h2>Toolbox <span class="badge-click">Click to Add</span></h2>
+          <div class="toolbox-grid">
+            <button class="tool-btn" id="tool-bar" data-type="bar">
+              <div class="tool-icon bar-icon"></div>
+              <span>Bar Magnet</span>
+            </button>
+            <button class="tool-btn" id="tool-wire" data-type="wire">
+              <div class="tool-icon wire-icon"></div>
+              <span>Current Wire</span>
+            </button>
+            <button class="tool-btn" id="tool-ball" data-type="ball">
+              <div class="tool-icon ball-icon"></div>
+              <span>Iron Ball</span>
+            </button>
+            <button class="tool-btn" id="tool-compass" data-type="compass">
+              <div class="tool-icon compass-icon"></div>
+              <span>Compass</span>
+            </button>
+            <button class="tool-btn" id="tool-filings" data-type="filings">
+              <div class="tool-icon filings-icon"></div>
+              <span>Sprinkle Filings</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Field Visualizations Section -->
+        <div class="sidebar-section">
+          <h2>Field Visualization</h2>
+          <div class="vis-controls">
+            <label class="checkbox-container">
+              <input type="checkbox" id="vis-field-lines" checked />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Glowing Field Lines</span>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="vis-flow" checked />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Animated Flux Flow</span>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="vis-heatmap" checked />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Field Strength Heatmap</span>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="vis-compass-grid" />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Compass Vector Grid</span>
+            </label>
+
+            <label class="checkbox-container">
+              <input type="checkbox" id="vis-forces" checked />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Show Force Vectors</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Inspector / Settings Section -->
+        <div class="sidebar-section" id="inspector-section">
+          <h2>Object Inspector</h2>
+          <div id="inspector-empty" class="inspector-hint">
+            Click an object to inspect & customize
+          </div>
+          <div id="inspector-content" class="hidden">
+            <div class="inspector-title" id="inspect-type">Bar Magnet</div>
+
+            <!-- Dynamic Controls based on selected object -->
+            <div class="control-group" id="group-strength">
+              <div class="slider-header">
+                <span>Magnet Strength</span>
+                <span id="inspect-strength-val" class="highlight-val"
+                  >10.0</span
+                >
+              </div>
+              <input
+                type="range"
+                id="inspect-strength-slider"
+                min="1"
+                max="50"
+                step="1"
+                value="10"
+              />
+            </div>
+
+            <div class="control-group hidden" id="group-current">
+              <div class="slider-header">
+                <span>Wire Current (A)</span>
+                <span id="inspect-current-val" class="highlight-val">2.0</span>
+              </div>
+              <input
+                type="range"
+                id="inspect-current-slider"
+                min="-10"
+                max="10"
+                step="0.5"
+                value="2"
+              />
+            </div>
+
+            <div class="checkbox-row">
+              <label class="checkbox-container">
+                <input type="checkbox" id="inspect-frozen" />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-label">Anchor in Space</span>
+              </label>
+            </div>
+
+            <button id="inspect-delete-btn" class="danger-btn">
+              🗑 Delete Object
+            </button>
+          </div>
+        </div>
+
+        <!-- Simulation Physics Settings -->
+        <div class="sidebar-section">
+          <h2>Simulation Settings</h2>
+          <div class="control-group">
+            <div class="slider-header">
+              <span>Time Damping</span>
+              <span id="damping-val">Low</span>
+            </div>
+            <input
+              type="range"
+              id="damping-slider"
+              min="0.0"
+              max="0.1"
+              step="0.005"
+              value="0.015"
+            />
+          </div>
+
+          <div class="checkbox-row">
+            <label class="checkbox-container">
+              <input type="checkbox" id="toggle-gravity" />
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Downward Gravity</span>
+            </label>
+          </div>
+        </div>
+
+        <button id="clear-scene-btn" class="danger-btn full-width">
+          🗑 Clear Workspace
+        </button>
+      </aside>
+
+      <!-- Bottom Playback Controls -->
+      <footer id="bottom-controls">
+        <button
+          id="btn-play-pause"
+          class="control-circle-btn playing"
+          title="Play / Pause (Spacebar)"
+        >
+          <span class="icon">⏸</span>
+        </button>
+        <button
+          id="btn-step"
+          class="control-circle-btn"
+          title="Step Simulation (S)"
+        >
+          <span class="icon">↷</span>
+        </button>
+        <button
+          id="btn-reset"
+          class="control-circle-btn"
+          title="Reset Scene (R)"
+        >
+          <span class="icon">⟲</span>
+        </button>
+        <div class="divider"></div>
+        <button
+          id="btn-help"
+          class="control-text-btn"
+          title="Show controls guide"
+        >
+          <span>Controls Guide</span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2>MAGNETIC SANDBOX 2D CONTROLS</h2>
+        <div class="modal-body">
+          <div class="control-row">
+            <span class="key">Left Click + Drag</span>
+            <span class="desc">Move objects around the sandbox</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Right Click + Drag</span>
+            <span class="desc">Rotate selected magnet / compass</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Mouse Wheel</span>
+            <span class="desc">Rotate selected magnet / compass precisely</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Double Click</span>
+            <span class="desc">Anchor (Freeze) / Unanchor object in space</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Delete / Backspace</span>
+            <span class="desc">Delete the selected object</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Spacebar</span>
+            <span class="desc">Play / Pause simulation</span>
+          </div>
+          <div class="control-row">
+            <span class="key">S Key</span>
+            <span class="desc">Step simulation one frame forward</span>
+          </div>
+          <div class="control-row">
+            <span class="key">R Key</span>
+            <span class="desc">Reset current preset scenario</span>
+          </div>
+        </div>
+        <button id="close-help-btn" class="modal-close-btn">Dismiss</button>
+      </div>
+    </div>
+
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

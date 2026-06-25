@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Quantum Flux: Magnetic Field Sandbox & Puzzles</title>
+    <meta
+      name="description"
+      content="An interactive, physically accurate 3D magnetism simulation and puzzle game using Three.js"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <!-- Main Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Glassmorphic HUD overlay -->
+    <div id="ui-container">
+      <!-- Top HUD Header -->
+      <header id="hud-header">
+        <div class="logo">
+          <span class="logo-glow"></span>
+          <h1>QUANTUM FLUX</h1>
+          <span class="subtitle">MAGNETISM ENGINE</span>
+        </div>
+        <div class="stats-panel">
+          <div class="stat-item">
+            <span class="stat-label">Energy</span>
+            <span id="stat-energy" class="stat-val">0.00 J</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Objects</span>
+            <span id="stat-count" class="stat-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">FPS</span>
+            <span id="stat-fps" class="stat-val">60</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Central Level Instruction / Alert Panel -->
+      <div id="instruction-panel" class="hidden">
+        <div class="instruction-icon">✦</div>
+        <div class="instruction-content">
+          <h3 id="level-title">Level Title</h3>
+          <p id="level-desc">Level description and objective go here.</p>
+        </div>
+        <button id="restart-level-btn" title="Restart Challenge">⟳</button>
+      </div>
+
+      <!-- Left Sidebar: Controls & Customization -->
+      <aside id="sidebar">
+        <!-- Section: Mode Select -->
+        <div class="sidebar-section">
+          <h2>Presets & Challenges</h2>
+          <div class="presets-grid" id="presets-list">
+            <!-- Dynamically populated via TSX -->
+          </div>
+        </div>
+
+        <!-- Section: Creator Toolbox -->
+        <div class="sidebar-section">
+          <h2>Toolbox <span class="badge">Drag or Click</span></h2>
+          <div class="toolbox-grid">
+            <button class="tool-btn" id="tool-bar" data-type="bar">
+              <div class="tool-icon cylinder"></div>
+              <span>Bar Magnet</span>
+            </button>
+            <button class="tool-btn" id="tool-sphere" data-type="sphere">
+              <div class="tool-icon sphere"></div>
+              <span>Neodymium Bead</span>
+            </button>
+            <button class="tool-btn" id="tool-compass" data-type="compass">
+              <div class="tool-icon compass"></div>
+              <span>Compass Stand</span>
+            </button>
+            <button
+              class="tool-btn"
+              id="tool-electromagnet"
+              data-type="electromagnet"
+            >
+              <div class="tool-icon coil"></div>
+              <span>Electromagnet</span>
+            </button>
+            <button class="tool-btn" id="tool-filings" data-type="filings">
+              <div class="tool-icon dots"></div>
+              <span>Iron Filings Box</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: Field Visualization Modes -->
+        <div class="sidebar-section">
+          <h2>Field Visualizations</h2>
+          <div class="vis-controls">
+            <label class="switch-container">
+              <input type="checkbox" id="vis-field-lines" checked />
+              <span class="switch-slider"></span>
+              <span class="switch-label">Glowing Field Lines</span>
+            </label>
+
+            <label class="switch-container">
+              <input type="checkbox" id="vis-particles" checked />
+              <span class="switch-slider"></span>
+              <span class="switch-label">Animated Flux Flow</span>
+            </label>
+
+            <label class="switch-container">
+              <input type="checkbox" id="vis-heatmap" />
+              <span class="switch-slider"></span>
+              <span class="switch-label">Field Intensity Slice</span>
+            </label>
+
+            <label class="switch-container">
+              <input type="checkbox" id="vis-compass-grid" />
+              <span class="switch-slider"></span>
+              <span class="switch-label">3D Vector Field Grid</span>
+            </label>
+
+            <label class="switch-container">
+              <input type="checkbox" id="vis-forces" checked />
+              <span class="switch-slider"></span>
+              <span class="switch-label">Force & Torque Vectors</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section: Physical Parameter Controls -->
+        <div class="sidebar-section">
+          <h2>Simulation Settings</h2>
+
+          <div class="control-group">
+            <div class="slider-header">
+              <span>Magnet Strength</span>
+              <span id="val-strength">1.0x</span>
+            </div>
+            <input
+              type="range"
+              id="slider-strength"
+              min="0.1"
+              max="5.0"
+              step="0.1"
+              value="1.0"
+            />
+          </div>
+
+          <div
+            class="control-group"
+            id="electromagnet-current-group"
+            style="display: none"
+          >
+            <div class="slider-header">
+              <span>Coil Current (A)</span>
+              <span id="val-current" class="highlight-val">2.0 A</span>
+            </div>
+            <input
+              type="range"
+              id="slider-current"
+              min="-10.0"
+              max="10.0"
+              step="0.5"
+              value="2.0"
+            />
+          </div>
+
+          <div class="control-group">
+            <div class="slider-header">
+              <span>Simulation Damping</span>
+              <span id="val-damping">Low</span>
+            </div>
+            <input
+              type="range"
+              id="slider-damping"
+              min="0.0"
+              max="0.1"
+              step="0.01"
+              value="0.02"
+            />
+          </div>
+
+          <div class="control-group">
+            <label class="switch-container">
+              <input type="checkbox" id="toggle-gravity" />
+              <span class="switch-slider"></span>
+              <span class="switch-label">Enable Gravity</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Clear Scene Button -->
+        <button id="clear-scene-btn" class="danger-btn">
+          🗑 Clear Workspace
+        </button>
+      </aside>
+
+      <!-- Bottom Physics Controls Panel -->
+      <footer id="bottom-controls">
+        <button
+          id="btn-play-pause"
+          class="control-circle-btn playing"
+          title="Play / Pause (Spacebar)"
+        >
+          <span class="icon">⏸</span>
+        </button>
+        <button
+          id="btn-step"
+          class="control-circle-btn"
+          title="Step Simulation (S)"
+        >
+          <span class="icon">↷</span>
+        </button>
+        <button
+          id="btn-reset"
+          class="control-circle-btn"
+          title="Reset Current Preset (R)"
+        >
+          <span class="icon">⟲</span>
+        </button>
+        <div class="divider"></div>
+        <button
+          id="btn-help"
+          class="control-text-btn"
+          title="Show Help Controls"
+        >
+          <span>Controls Guide</span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- Help Controls Modal Overlay -->
+    <div id="help-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2>MAGNETIC SANDBOX CONTROLS</h2>
+        <div class="modal-body">
+          <div class="control-row">
+            <span class="key">Left Click + Drag</span>
+            <span class="desc"
+              >Move magnet (projects parallel to the viewport plane)</span
+            >
+          </div>
+          <div class="control-row">
+            <span class="key">Right Click + Drag</span>
+            <span class="desc">Rotate magnet around camera axes</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Scroll Wheel</span>
+            <span class="desc"
+              >Push magnet further or pull it closer (Z-depth)</span
+            >
+          </div>
+          <div class="control-row">
+            <span class="key">Double Click</span>
+            <span class="desc"
+              >Freeze / Unfreeze magnet (anchors it in space)</span
+            >
+          </div>
+          <div class="control-row">
+            <span class="key">Shift + Left Drag</span>
+            <span class="desc">Orbit camera around the scene</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Spacebar</span>
+            <span class="desc">Toggle play / pause simulation</span>
+          </div>
+          <div class="control-row">
+            <span class="key">S Key</span>
+            <span class="desc">Step simulation forward by one tick</span>
+          </div>
+          <div class="control-row">
+            <span class="key">Delete / Backspace</span>
+            <span class="desc">Delete the hovered or active magnet</span>
+          </div>
+        </div>
+        <button id="close-help-btn" class="modal-close-btn">Dismiss</button>
+      </div>
+    </div>
+
+    <!-- Win Level Success Modal -->
+    <div id="win-modal" class="modal-overlay hidden">
+      <div class="modal-content success">
+        <div class="success-icon">🏆</div>
+        <h2>CHALLENGE COMPLETE!</h2>
+        <p id="win-message">Excellent! You've solved the magnetic puzzle.</p>
+        <div class="modal-buttons">
+          <button id="win-retry-btn" class="modal-close-btn secondary">
+            Replay
+          </button>
+          <button id="win-next-btn" class="modal-close-btn primary">
+            Next Challenge
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

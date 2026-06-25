@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interaction Nets Playground</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Top Header -->
+      <header class="app-header">
+        <div class="brand">
+          <span class="icon">⚡</span>
+          <h1>INTERACTION NETS</h1>
+          <span class="badge">Playground</span>
+        </div>
+        <div class="global-controls">
+          <div class="control-group">
+            <label for="system-select">System:</label>
+            <select id="system-select">
+              <option value="combinators">Interaction Combinators</option>
+              <option value="arithmetic">Unary Arithmetic</option>
+              <option value="logic">Boolean Logic</option>
+              <option value="custom">Custom System</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="preset-select">Preset Net:</label>
+            <select id="preset-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="mode-toggle">
+            <button id="btn-mode-edit" class="mode-btn active">
+              <span>🛠️</span> Edit
+            </button>
+            <button id="btn-mode-sim" class="mode-btn">
+              <span>🚀</span> Simulate
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Workspace -->
+      <main class="workspace">
+        <!-- Left Panel: Rules and Presets -->
+        <aside class="panel left-panel">
+          <section class="panel-section">
+            <h2 class="section-title">Rewrite Rules</h2>
+            <div id="rules-list" class="rules-container">
+              <!-- Rule visual previews will be generated here -->
+            </div>
+          </section>
+
+          <section class="panel-section instructions-section">
+            <h2 class="section-title">Quick Guide</h2>
+            <div class="instructions-content">
+              <h3>Edit Mode:</h3>
+              <ul>
+                <li>
+                  <strong>Add Cell:</strong> Click a symbol in the inspector and
+                  double-click the canvas.
+                </li>
+                <li>
+                  <strong>Add Wire:</strong> Drag from one port to another.
+                </li>
+                <li><strong>Add Loop:</strong> Shift-click a port.</li>
+                <li><strong>Drag:</strong> Drag a cell or free port.</li>
+                <li>
+                  <strong>Rotate:</strong> Scroll while hovering over a cell, or
+                  drag its rotation handle.
+                </li>
+                <li>
+                  <strong>Delete:</strong> Select cell/wire/free-port and press
+                  <kbd>Delete</kbd> or <kbd>Backspace</kbd>.
+                </li>
+              </ul>
+              <h3>Simulate Mode:</h3>
+              <ul>
+                <li>
+                  Active wires (linking two principal ports) glow in purple.
+                </li>
+                <li>
+                  Click <strong>Step</strong> or <strong>Play</strong> to reduce
+                  the net.
+                </li>
+                <li>
+                  Watch the physics layout automatically clean up the wires.
+                </li>
+              </ul>
+            </div>
+          </section>
+        </aside>
+
+        <!-- Canvas Area (Center) -->
+        <div class="canvas-container">
+          <canvas id="canvas"></canvas>
+
+          <!-- Simulation Floating Controls -->
+          <div id="sim-controls" class="floating-controls hidden">
+            <button id="btn-play" class="sim-btn" title="Play (Space)">
+              ▶ Play
+            </button>
+            <button id="btn-step" class="sim-btn" title="Step (Right Arrow)">
+              ➡️ Step
+            </button>
+            <button id="btn-reset" class="sim-btn" title="Reset to Initial Net">
+              🔄 Reset
+            </button>
+            <button id="btn-clear" class="sim-btn" title="Clear Canvas">
+              🗑️ Clear
+            </button>
+
+            <div class="slider-group">
+              <label for="speed-slider">Speed:</label>
+              <input
+                type="range"
+                id="speed-slider"
+                min="1"
+                max="10"
+                value="5"
+              />
+            </div>
+
+            <div class="toggle-group">
+              <input type="checkbox" id="physics-toggle" checked />
+              <label for="physics-toggle">Physics Layout</label>
+            </div>
+          </div>
+
+          <!-- Edit Floating Controls -->
+          <div id="edit-controls" class="floating-controls">
+            <button
+              id="btn-add-free"
+              class="edit-btn"
+              title="Add a free port to the canvas"
+            >
+              📍 Add Free Port
+            </button>
+            <button id="btn-clear-edit" class="edit-btn" title="Clear Canvas">
+              🗑️ Clear
+            </button>
+            <div class="toggle-group">
+              <input type="checkbox" id="physics-edit-toggle" checked />
+              <label for="physics-edit-toggle">Physics Layout</label>
+            </div>
+          </div>
+
+          <!-- HUD Status Panel -->
+          <div class="hud-panel">
+            <div class="hud-item">
+              Status:
+              <span id="hud-status" class="status-badge idle">Idle</span>
+            </div>
+            <div class="hud-item">
+              Active Pairs: <span id="hud-active-pairs">0</span>
+            </div>
+            <div class="hud-item">
+              Rewrites: <span id="hud-rewrites-count">0</span>
+            </div>
+          </div>
+
+          <!-- Canvas Zoom/Pan Hint -->
+          <div class="canvas-hint">Drag canvas to pan • Scroll to zoom</div>
+        </div>
+
+        <!-- Right Panel: Inspector and Custom System Editor -->
+        <aside class="panel right-panel">
+          <!-- Selection Inspector -->
+          <section class="panel-section" id="inspector-section">
+            <h2 class="section-title">Inspector</h2>
+            <div id="inspector-default" class="inspector-content">
+              <p class="placeholder-text">
+                Select a cell, port, or wire to view details and edit
+                properties.
+              </p>
+
+              <div class="quick-add-cells">
+                <h3>Add Cell</h3>
+                <div class="symbol-buttons-grid" id="add-cell-grid">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <div id="inspector-cell" class="inspector-content hidden">
+              <h3>Cell Details</h3>
+              <div class="property-row">
+                <span class="label">ID:</span>
+                <span id="inspect-cell-id" class="value"></span>
+              </div>
+              <div class="property-row">
+                <span class="label">Symbol:</span>
+                <select id="inspect-cell-symbol">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div class="property-row">
+                <span class="label">Arity:</span>
+                <span id="inspect-cell-arity" class="value"></span>
+              </div>
+              <div class="property-row">
+                <span class="label">Rotation:</span>
+                <input
+                  type="range"
+                  id="inspect-cell-rotation"
+                  min="0"
+                  max="360"
+                  value="0"
+                />
+              </div>
+              <div class="actions-row">
+                <button id="btn-delete-cell" class="danger-btn">
+                  🗑_ Delete Cell
+                </button>
+              </div>
+            </div>
+
+            <div id="inspector-wire" class="inspector-content hidden">
+              <h3>Wire Details</h3>
+              <div class="property-row">
+                <span class="label">ID:</span>
+                <span id="inspect-wire-id" class="value"></span>
+              </div>
+              <div class="property-row">
+                <span class="label">Port A:</span>
+                <span id="inspect-wire-porta" class="value"></span>
+              </div>
+              <div class="property-row">
+                <span class="label">Port B:</span>
+                <span id="inspect-wire-portb" class="value"></span>
+              </div>
+              <div class="actions-row">
+                <button id="btn-delete-wire" class="danger-btn">
+                  🗑_ Delete Wire
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Custom Rule Builder -->
+          <section class="panel-section hidden" id="custom-system-section">
+            <h2 class="section-title">Custom System Config</h2>
+
+            <div class="custom-panel-content">
+              <h3>Symbols</h3>
+              <div class="custom-symbols-list" id="custom-symbols-list">
+                <!-- List of custom symbols -->
+              </div>
+              <button id="btn-add-custom-symbol" class="secondary-btn">
+                + Add Symbol
+              </button>
+
+              <h3 style="margin-top: 1.5rem">Rewrite Rules</h3>
+              <div class="custom-rules-list" id="custom-rules-list">
+                <!-- List of custom rules -->
+              </div>
+              <button id="btn-create-custom-rule" class="secondary-btn">
+                + Create Rewrite Rule
+              </button>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <!-- Custom Rule Visual Editor Modal -->
+    <div id="rule-modal" class="modal hidden">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2>Design Rewrite Rule</h2>
+          <button id="btn-close-modal" class="close-btn">&times;</button>
+        </header>
+        <div class="modal-body">
+          <div class="rule-setup-row">
+            <div class="control-group">
+              <label for="rule-sym1-select">Symbol 1:</label>
+              <select id="rule-sym1-select"></select>
+            </div>
+            <div class="control-group">
+              <label for="rule-sym2-select">Symbol 2:</label>
+              <select id="rule-sym2-select"></select>
+            </div>
+          </div>
+
+          <div class="rule-canvas-explanation">
+            <p>
+              <strong>LHS (Left Hand Side):</strong> An active pair of these two
+              cells connected by their principal ports.
+            </p>
+            <p>
+              <strong>RHS (Right Hand Side):</strong> Draw the replacement net.
+              You have <span id="modal-free-ports-count">0</span> free ports
+              representing the auxiliary ports of the LHS cells. Connect them
+              with wires or add new cells inside the box.
+            </p>
+          </div>
+
+          <div class="rule-editor-layout">
+            <div class="rule-editor-canvas-container">
+              <span class="canvas-tag">RHS Net Designer</span>
+              <canvas id="rule-editor-canvas"></canvas>
+              <div class="rule-editor-toolbar">
+                <button id="btn-modal-add-cell" class="mini-btn">
+                  Add Cell
+                </button>
+                <button id="btn-modal-clear" class="mini-btn">Clear RHS</button>
+              </div>
+            </div>
+            <div class="rule-editor-sidebar">
+              <h3>Available Symbols</h3>
+              <div class="symbol-buttons-grid" id="modal-symbol-grid"></div>
+
+              <h3 style="margin-top: 1.2rem">Free Ports Mapping</h3>
+              <ul class="free-ports-mapping-list" id="modal-ports-list">
+                <!-- Dynamically listed mapping -->
+              </ul>
+            </div>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <button id="btn-cancel-rule" class="secondary-btn">Cancel</button>
+          <button id="btn-save-rule" class="primary-btn">Save Rule</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Script main module -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

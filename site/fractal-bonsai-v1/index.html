@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zen Bonsai - 3D Fractal Simulation</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <!-- Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Zen Loading Screen -->
+    <div id="loader" class="loader-overlay">
+      <div class="loader-content">
+        <div class="loader-circle"></div>
+        <h1 class="loader-title">Zen Bonsai</h1>
+        <p class="loader-subtitle">Cultivating procedural fractals...</p>
+        <div class="loader-bar-container">
+          <div id="loader-bar" class="loader-bar"></div>
+        </div>
+        <p id="loader-quote" class="loader-quote">
+          "The art of bonsai is about patience, balance, and harmony with
+          nature."
+        </p>
+      </div>
+    </div>
+
+    <!-- Premium Glass HUD -->
+    <div id="hud" class="hud-container hidden">
+      <!-- Title & Time Header -->
+      <header class="hud-header">
+        <div class="brand">
+          <span class="brand-tag">PROCEDURAL ART</span>
+          <h1 class="brand-title">Zen Bonsai</h1>
+        </div>
+        <div class="status-indicator">
+          <span id="current-season-lbl">Spring</span>
+          <span class="dot-separator">•</span>
+          <span id="current-weather-lbl">Gentle Breeze</span>
+          <span class="dot-separator">•</span>
+          <span id="current-time-lbl">Afternoon</span>
+        </div>
+      </header>
+
+      <!-- Main Controls Sidebar -->
+      <aside class="controls-panel">
+        <!-- Tab Headers -->
+        <div class="tab-headers">
+          <button id="tab-btn-env" class="tab-btn active" data-tab="tab-env">
+            Atmosphere
+          </button>
+          <button id="tab-btn-tree" class="tab-btn" data-tab="tab-tree">
+            Bonsai Art
+          </button>
+        </div>
+
+        <!-- Tab 1: Atmosphere & Climate -->
+        <div id="tab-env" class="tab-content active">
+          <!-- Season Selector -->
+          <div class="control-group">
+            <label class="group-label">Season</label>
+            <div class="btn-grid-4">
+              <button
+                class="select-btn active"
+                id="btn-season-spring"
+                data-val="spring"
+              >
+                🌸 Spring
+              </button>
+              <button
+                class="select-btn"
+                id="btn-season-summer"
+                data-val="summer"
+              >
+                ☀️ Summer
+              </button>
+              <button
+                class="select-btn"
+                id="btn-season-autumn"
+                data-val="autumn"
+              >
+                🍁 Autumn
+              </button>
+              <button
+                class="select-btn"
+                id="btn-season-winter"
+                data-val="winter"
+              >
+                ❄️ Winter
+              </button>
+            </div>
+            <div class="checkbox-row mt-2">
+              <input type="checkbox" id="chk-auto-cycle" checked />
+              <label for="chk-auto-cycle">Auto-Cycle Seasons</label>
+            </div>
+          </div>
+
+          <!-- Weather Mode -->
+          <div class="control-group">
+            <label class="group-label">Weather Condition</label>
+            <div class="btn-grid-4">
+              <button
+                class="select-btn active"
+                id="btn-weather-sunny"
+                data-val="sunny"
+              >
+                Sunny
+              </button>
+              <button
+                class="select-btn"
+                id="btn-weather-rainy"
+                data-val="rainy"
+              >
+                Rainy
+              </button>
+              <button
+                class="select-btn"
+                id="btn-weather-snowy"
+                data-val="snowy"
+              >
+                Snowy
+              </button>
+              <button
+                class="select-btn"
+                id="btn-weather-windy"
+                data-val="windy"
+              >
+                Windy
+              </button>
+            </div>
+          </div>
+
+          <!-- Time of Day -->
+          <div class="control-group">
+            <label class="group-label">Time of Day</label>
+            <div class="btn-grid-4">
+              <button class="select-btn" id="btn-time-dawn" data-val="dawn">
+                Dawn
+              </button>
+              <button
+                class="select-btn active"
+                id="btn-time-day"
+                data-val="day"
+              >
+                Day
+              </button>
+              <button class="select-btn" id="btn-time-dusk" data-val="dusk">
+                Dusk
+              </button>
+              <button class="select-btn" id="btn-time-night" data-val="night">
+                Night
+              </button>
+            </div>
+          </div>
+
+          <!-- Audio & Ambient Sound -->
+          <div class="control-group">
+            <label class="group-label">Zen Ambience</label>
+            <div class="audio-control-row">
+              <button id="btn-audio-toggle" class="audio-btn">
+                🔊 Sound Off
+              </button>
+              <div class="slider-container flex-grow">
+                <input
+                  type="range"
+                  id="rng-audio-vol"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value="0.5"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Bonsai Customization -->
+        <div id="tab-tree" class="tab-content">
+          <!-- Foliage Style -->
+          <div class="control-group">
+            <label class="group-label">Foliage Type</label>
+            <div class="btn-grid-2">
+              <button
+                class="select-btn active"
+                id="btn-style-sakura"
+                data-val="sakura"
+              >
+                Sakura
+              </button>
+              <button class="select-btn" id="btn-style-pine" data-val="pine">
+                Pine Needle
+              </button>
+            </div>
+          </div>
+
+          <!-- Fractal Depth -->
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="rng-depth">Fractal Depth</label>
+              <span id="lbl-depth">4</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                id="rng-depth"
+                min="2"
+                max="6"
+                step="1"
+                value="4"
+              />
+            </div>
+            <small class="help-text"
+              >Higher values increase branches exponentially.</small
+            >
+          </div>
+
+          <!-- Branching Angle -->
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="rng-angle">Branching Angle</label>
+              <span id="lbl-angle">28°</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                id="rng-angle"
+                min="15"
+                max="45"
+                step="1"
+                value="28"
+              />
+            </div>
+          </div>
+
+          <!-- Gnarliness / Twist -->
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="rng-gnarl">Gnarliness (Twist)</label>
+              <span id="lbl-gnarl">0.6</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                id="rng-gnarl"
+                min="0"
+                max="1.5"
+                step="0.1"
+                value="0.6"
+              />
+            </div>
+          </div>
+
+          <!-- Foliage Density -->
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="rng-leaf-density">Foliage Density</label>
+              <span id="lbl-leaf-density">70%</span>
+            </div>
+            <div class="slider-container">
+              <input
+                type="range"
+                id="rng-leaf-density"
+                min="10"
+                max="100"
+                step="5"
+                value="70"
+              />
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="control-actions">
+            <button id="btn-prune" class="action-btn">✂️ Prune & Shape</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- View Controls & Footer -->
+      <footer class="hud-footer">
+        <button id="btn-reset-cam" class="footer-btn">Reset View</button>
+        <div class="footer-note">Orbit: Drag | Zoom: Scroll</div>
+      </footer>
+    </div>
+
+    <!-- Web Audio Context Activation Prompt -->
+    <div id="audio-prompt" class="audio-prompt hidden">
+      <div class="prompt-box">
+        <p>Enable procedural soundscapes for ambient immersion?</p>
+        <div class="prompt-buttons">
+          <button id="btn-prompt-yes" class="prompt-btn-yes">
+            Enable Sound
+          </button>
+          <button id="btn-prompt-no" class="prompt-btn-no">Keep Muted</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts compiled by Bun -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
