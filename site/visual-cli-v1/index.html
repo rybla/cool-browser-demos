@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visual CLI - Physical Terminal Emulator</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="app-container">
+      <canvas id="canvas"></canvas>
+
+      <!-- Scanline/CRT Effect Overlay -->
+      <div class="crt-overlay"></div>
+
+      <!-- Header HUD -->
+      <header class="hud-header">
+        <div class="hud-title">VISUAL_CLI//SYS_ACTIVE</div>
+        <div class="hud-status">
+          <span id="status-gravity">GRAVITY: DOWN</span>
+          <span class="hud-separator">|</span>
+          <span id="status-wind">WIND: OFF</span>
+          <span class="hud-separator">|</span>
+          <span id="status-vortex">VORTEX: OFF</span>
+        </div>
+      </header>
+
+      <!-- Input Bar (Overlayed at the bottom) -->
+      <div class="input-container">
+        <div class="input-row">
+          <span class="input-prompt">visitor@visual-cli:~$</span>
+          <input
+            type="text"
+            id="terminal-input"
+            placeholder="Type 'help' to start..."
+            autocomplete="off"
+            spellcheck="false"
+            autofocus
+          />
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

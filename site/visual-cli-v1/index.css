@@ -1,0 +1,201 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Outfit:wght@400;600&display=swap");
+
+:root {
+  --bg-color: #050508;
+  --text-primary: #00ffcc;
+  --text-secondary: #ff007f;
+  --text-muted: #4e5e78;
+  --hud-bg: rgba(10, 10, 18, 0.6);
+  --hud-border: rgba(0, 255, 204, 0.25);
+  --font-mono: "Fira Code", monospace;
+  --font-sans: "Outfit", sans-serif;
+  --glow-cyan: 0 0 10px rgba(0, 255, 204, 0.6);
+  --glow-pink: 0 0 10px rgba(255, 0, 127, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  font-family: var(--font-sans);
+  color: #fff;
+}
+
+#app-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* CRT Scanline Overlay */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.06),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.06)
+    );
+  background-size:
+    100% 4px,
+    3px 100%;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* Header HUD */
+.hud-header {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 900px;
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 10px rgba(0, 255, 204, 0.05);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.hud-title {
+  color: var(--text-primary);
+  text-shadow: var(--glow-cyan);
+  font-weight: bold;
+}
+
+.hud-status {
+  display: flex;
+  gap: 15px;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.hud-status span {
+  transition: all 0.3s ease;
+}
+
+.hud-separator {
+  color: var(--text-muted);
+}
+
+/* Input Row Container */
+.input-container {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 700px;
+  background: rgba(10, 10, 18, 0.85);
+  border: 1px solid var(--hud-border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(0, 255, 204, 0.05),
+    inset 0 0 15px rgba(0, 255, 204, 0.1);
+  font-family: var(--font-mono);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.input-container:focus-within {
+  border-color: rgba(0, 255, 204, 0.7);
+  box-shadow:
+    0 10px 35px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(0, 255, 204, 0.15),
+    inset 0 0 15px rgba(0, 255, 204, 0.15);
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-prompt {
+  color: var(--text-primary);
+  text-shadow: var(--glow-cyan);
+  margin-right: 12px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+#terminal-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  caret-color: var(--text-primary);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  user-select: text;
+}
+
+#terminal-input::placeholder {
+  color: var(--text-muted);
+  text-shadow: none;
+  font-size: 0.95rem;
+}
+
+/* Background visual enhancements */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(15, 10, 30, 0) 40%,
+    rgba(5, 5, 8, 0.8) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
