@@ -1,0 +1,287 @@
+/* Minimalist Hand-Drawn Paper CSS styling for Scribble Roll */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Outfit", sans-serif;
+  color: #2b2b2a;
+  background-color: #f7f4ed; /* Warm paper base */
+}
+
+#game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* Hand-drawn Paper Vignette to give a notebook border shadow */
+.vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: inset 0 0 80px rgba(80, 70, 60, 0.15);
+  border: 12px solid #f0ece3;
+}
+
+/* HUD Overlay */
+.hud-container {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  gap: 16px;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.hud-card {
+  background: rgba(254, 253, 250, 0.9);
+  padding: 10px 18px;
+  border: 2px solid #3c3c3a;
+  /* Jittery hand-drawn border effect */
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 3px 3px 0px rgba(43, 43, 42, 0.85);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hud-label {
+  font-family: "Caveat", cursive;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #696966;
+}
+
+.hud-value {
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.4rem;
+  color: #2b2b2a;
+}
+
+/* Overlay Screen Styles */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(246, 243, 235, 0.65); /* Soft sketch semi-transparency */
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.hidden,
+.hud-container.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Paper Card container representing a sketchbook sheet */
+.paper-card {
+  width: 90%;
+  max-width: 520px;
+  background: #fdfbf7;
+  padding: 40px 32px;
+  border: 3px solid #2b2b2a;
+  border-radius: 8px 120px 12px 95px / 95px 12px 105px 8px; /* High jitter */
+  box-shadow: 8px 12px 0px rgba(43, 43, 42, 0.95);
+  position: relative;
+  text-align: center;
+  /* Lined notebook decoration */
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(239, 114, 114, 0.25) 0px,
+      rgba(239, 114, 114, 0.25) 2px,
+      transparent 2px
+    ),
+    linear-gradient(rgba(100, 160, 230, 0.15) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 28px;
+  background-position:
+    50px 0,
+    0 16px;
+}
+
+.menu-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-title {
+  font-family: "Gochi Hand", cursive;
+  font-size: 3.8rem;
+  line-height: 1;
+  color: #1a1a19;
+  transform: rotate(-2deg);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.text-red {
+  color: #c94a4a;
+}
+
+.game-subtitle {
+  font-family: "Caveat", cursive;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #555553;
+  margin-top: -8px;
+  transform: rotate(1deg);
+}
+
+/* Instruction card box */
+.instructions-card {
+  border: 2px dashed #6b6b68;
+  border-radius: 20px 10px 30px 12px / 12px 30px 10px 20px;
+  padding: 16px;
+  background: rgba(254, 253, 250, 0.5);
+  text-align: left;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.instructions-card h3 {
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: #3b3b3a;
+}
+
+.instructions-card p {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #4a4a47;
+  margin-bottom: 12px;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.control-key {
+  background: #2b2b2a;
+  color: #fdfbf7;
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.1rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 70px;
+  transform: rotate(1deg);
+  box-shadow: 1px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.control-desc {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4a4a47;
+}
+
+/* Hand-sketched Button */
+.sketch-btn {
+  background: transparent;
+  color: #2b2b2a;
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.8rem;
+  font-weight: bold;
+  padding: 8px 32px;
+  cursor: pointer;
+  border: 2px solid #2b2b2a;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  box-shadow: 4px 5px 0px rgba(43, 43, 42, 0.95);
+  background-color: #fdfbf7;
+  transition: all 0.15s ease;
+  outline: none;
+  transform: rotate(1deg);
+}
+
+.sketch-btn:hover {
+  transform: scale(1.04) rotate(-1deg);
+  box-shadow: 2px 3px 0px rgba(43, 43, 42, 0.95);
+}
+
+.sketch-btn:active {
+  transform: scale(0.97) rotate(0deg);
+  box-shadow: 1px 1px 0px rgba(43, 43, 42, 0.95);
+}
+
+/* Stats summary styling */
+.stats-summary {
+  margin: 15px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4a4a47;
+  text-align: center;
+}
+
+.sketch-value {
+  font-family: "Gochi Hand", cursive;
+  font-size: 1.6rem;
+  color: #1a1a19;
+  margin-left: 4px;
+}
+
+/* Loading indicators */
+.loading-bar-container {
+  width: 100%;
+  height: 14px;
+  border: 2px solid #2b2b2a;
+  border-radius: 20px;
+  padding: 2px;
+  background: rgba(254, 253, 250, 0.8);
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.loading-bar {
+  height: 100%;
+  width: 0%;
+  background: #3b3b3a;
+  border-radius: 20px;
+  transition: width 0.1s ease;
+}
+
+/* Helper to hide screens */
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scribble Roll - A 2.5D Procedural Sketch Runner</title>
+    <meta
+      name="description"
+      content="A 2.5D physics runner-style rolling marble game procedurally generated using Wave Function Collapse and featuring interactive Web Audio synth soundscapes."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Gochi+Hand&family=Outfit:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="canvas"></canvas>
+
+      <!-- Hand-drawn Paper Vignette Overlay -->
+      <div class="vignette"></div>
+
+      <!-- Paper HUD Overlay -->
+      <div id="hud" class="hud-container hidden">
+        <div class="hud-card">
+          <span class="hud-label">Distance:</span>
+          <span id="hud-distance" class="hud-value">0m</span>
+        </div>
+        <div class="hud-card">
+          <span class="hud-label">Speed:</span>
+          <span id="hud-speed" class="hud-value">0 m/s</span>
+        </div>
+        <div class="hud-card">
+          <span class="hud-label">Chimes:</span>
+          <span id="hud-chimes" class="hud-value">0</span>
+        </div>
+      </div>
+
+      <!-- Main Menu Overlay -->
+      <div id="menu-overlay" class="overlay">
+        <div class="paper-card menu-content">
+          <h1 class="game-title">Scribble Roll</h1>
+          <p class="game-subtitle">A Physics Marble Adventure</p>
+
+          <div class="instructions-card">
+            <h3>How to Play</h3>
+            <p>
+              Roll the marble through an infinite, procedurally hand-sketched
+              notebook world. Overcome physics puzzles, unlock gates, and build
+              momentum to clear giant chasms!
+            </p>
+            <div class="controls-grid">
+              <div class="control-key">A / D</div>
+              <div class="control-desc">Accelerate Backwards / Forwards</div>
+              <div class="control-key">Left / Right</div>
+              <div class="control-desc">Accelerate Backwards / Forwards</div>
+              <div class="control-key">Shift / Space</div>
+              <div class="control-desc">Dash Backwards / Forwards</div>
+            </div>
+          </div>
+
+          <button id="btn-start" class="sketch-btn">Start Roll</button>
+        </div>
+      </div>
+
+      <!-- Game Over Overlay -->
+      <div id="gameover-overlay" class="overlay hidden">
+        <div class="paper-card menu-content">
+          <h2 class="game-title text-red">Out of Bounds!</h2>
+          <p class="game-subtitle">Your marble plunged into the margins.</p>
+
+          <div class="stats-summary">
+            <p>
+              Distance Traveled:
+              <span id="summary-distance" class="sketch-value">0m</span>
+            </p>
+            <p>
+              Chimes Found:
+              <span id="summary-chimes" class="sketch-value">0</span>
+            </p>
+          </div>
+
+          <button id="btn-restart" class="sketch-btn">Roll Again</button>
+        </div>
+      </div>
+
+      <!-- Pause Overlay -->
+      <div id="pause-overlay" class="overlay hidden">
+        <div class="paper-card menu-content">
+          <h2 class="game-title">Paused</h2>
+          <p class="game-subtitle">Catching your breath?</p>
+          <button id="btn-resume" class="sketch-btn">Resume</button>
+        </div>
+      </div>
+
+      <!-- Loading / Audio Consent Overlay -->
+      <div id="loading-overlay" class="overlay">
+        <div class="paper-card menu-content">
+          <h2 class="game-title">Loading World...</h2>
+          <p class="game-subtitle">Sketching obstacles and tuning strings...</p>
+          <div class="loading-bar-container">
+            <div id="loading-progress" class="loading-bar"></div>
+          </div>
+          <button id="btn-consent" class="sketch-btn hidden">
+            Initialize Synth & Play
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script entry -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
