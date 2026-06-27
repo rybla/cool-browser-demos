@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Overdrive - Retro 2D Physics Runner</title>
+    <meta
+      name="description"
+      content="A glowing 2D physics-based retro runner game built using Three.js rendering, Rapier2D physics, and synthesized Web Audio chiptunes."
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="crt-wrapper">
+      <!-- Game Canvas -->
+      <canvas id="canvas"></canvas>
+
+      <!-- HUD (Heads Up Display) -->
+      <div id="hud" class="hidden">
+        <div class="hud-panel">
+          <div class="hud-row">
+            <span class="hud-label">SHIELD:</span>
+            <div id="hud-shield" class="shield-bar">
+              <!-- Dynamically populated hearts -->
+            </div>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">ENERGY:</span>
+            <div class="energy-bar-bg">
+              <div id="hud-energy-fill" class="energy-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-panel hud-panel-right">
+          <div class="hud-row">
+            <span class="hud-label">COINS:</span>
+            <span id="hud-coins" class="hud-value">000</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">DIST:</span>
+            <span id="hud-distance" class="hud-value-large">0000m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Reminder -->
+      <div id="controls-reminder" class="controls-reminder hidden">
+        [A/D] Speed Adjust | [W] Jump | [S] Slam | [SPACE]
+        <span>Neon Overdrive Dash</span>
+      </div>
+
+      <!-- Countdown Overlay -->
+      <div id="countdown-overlay" class="hidden">
+        <div id="countdown-text" class="countdown-text">READY</div>
+      </div>
+
+      <!-- Main Menu Screen -->
+      <div id="screen-menu" class="screen">
+        <div class="panel">
+          <h1 class="title">NEON OVERDRIVE</h1>
+          <p class="subtitle">A retro 2D physics-based cyber runner</p>
+
+          <div class="instructions">
+            <h3>Mission Objectives</h3>
+            <ul>
+              <li>
+                Run as far as you can down the infinite glowing vector grid.
+              </li>
+              <li>
+                Dodge red hazard spikes and hostile orange drone interceptors.
+              </li>
+              <li>
+                Press <strong>[SPACEBAR]</strong> for Neon Overdrive Dash to
+                blast forward and break pink walls!
+              </li>
+              <li>
+                Press <strong>[S]</strong> or <strong>[Down Arrow]</strong> in
+                mid-air to ground-slam and destroy floor obstacles.
+              </li>
+              <li>
+                Reach glowing green checkpoints to repair systems and select
+                attribute upgrades.
+              </li>
+            </ul>
+          </div>
+
+          <div class="menu-options">
+            <button id="btn-start" class="btn btn-magenta">
+              INITIALIZE SYSTEM
+            </button>
+          </div>
+
+          <div class="volume-controls">
+            <label class="volume-toggle">
+              <input type="checkbox" id="toggle-sfx" checked />
+              <span>SFX [ON]</span>
+            </label>
+            <label class="volume-toggle">
+              <input type="checkbox" id="toggle-bgm" checked />
+              <span>BGM [ON]</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upgrade Selection Screen -->
+      <div id="screen-upgrade" class="screen hidden">
+        <div class="panel panel-magenta">
+          <h1 class="title">CHECKPOINT CLEAR</h1>
+          <p class="subtitle">
+            Select a cybernetic upgrade to enhance your runner attributes
+          </p>
+
+          <div id="upgrade-options" class="upgrade-container">
+            <!-- 3 Upgrade cards populated dynamically -->
+          </div>
+
+          <div class="attributes-panel">
+            <div class="attribute-row">
+              <span>SPEED (MAX)</span>
+              <span id="stat-speed">10.0</span>
+            </div>
+            <div class="attribute-row">
+              <span>JUMP POWER</span>
+              <span id="stat-jump">13.0</span>
+            </div>
+            <div class="attribute-row">
+              <span>AGILITY (CD)</span>
+              <span id="stat-agility">3.0s</span>
+            </div>
+            <div class="attribute-row">
+              <span>SHIELD MAX</span>
+              <span id="stat-shield">3 / 3</span>
+            </div>
+            <div class="attribute-row">
+              <span>BATTERY / MAG</span>
+              <span id="stat-magnet">2.0m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Over Screen -->
+      <div id="screen-gameover" class="screen hidden">
+        <div class="panel">
+          <h1
+            class="title"
+            style="
+              color: var(--neon-red);
+              text-shadow: 0 0 10px rgba(255, 7, 58, 0.6);
+            "
+          >
+            SYSTEM FAILURE
+          </h1>
+          <p class="subtitle">Your ship's integrity has been compromised.</p>
+
+          <div class="stats-summary">
+            <div class="stats-row">
+              <span>DISTANCE TRAVELED:</span>
+              <span id="final-distance">0m</span>
+            </div>
+            <div class="stats-row">
+              <span>GLITCH COINS OBTAINED:</span>
+              <span id="final-coins">0</span>
+            </div>
+            <div class="stats-row">
+              <span>CHECKPOINTS REACHED:</span>
+              <span id="final-checkpoints">0</span>
+            </div>
+            <div class="stats-row">
+              <span>DIFFICULTY INDEX:</span>
+              <span id="final-difficulty">1.0x</span>
+            </div>
+          </div>
+
+          <button id="btn-restart" class="btn">REBOOT KERNEL</button>
+        </div>
+      </div>
+
+      <!-- CRT Visual Effects Overlay -->
+      <div class="crt-effects">
+        <div class="crt-scanlines"></div>
+        <div class="crt-vignette"></div>
+        <div class="crt-roll"></div>
+        <div class="crt-flicker"></div>
+      </div>
+    </div>
+
+    <!-- Script loading -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
