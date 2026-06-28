@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wasteland Cruise - 2.5D Low-Poly Sim</title>
+    <link rel="stylesheet" href="./index.css" />
+    <!-- Google Fonts for heavy industrial style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syncopate:wght@700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Main Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Gritty CRT Post-processing Overlay -->
+    <div class="crt-overlay"></div>
+    <div class="vignette-overlay"></div>
+    <div class="noise-overlay"></div>
+
+    <!-- HUD / Diagnostic Panel -->
+    <div id="hud" class="hidden">
+      <!-- Top Bar: Telemetry -->
+      <div class="hud-top">
+        <div class="hud-group">
+          <div class="hud-label">COORDS</div>
+          <div id="hud-coords" class="hud-value">X: 0.00 | Z: 0.00</div>
+        </div>
+        <div class="hud-group">
+          <div class="hud-label">ALTITUDE</div>
+          <div id="hud-alt" class="hud-value">0.0m</div>
+        </div>
+        <div class="hud-group">
+          <div class="hud-label">DIST</div>
+          <div id="hud-dist" class="hud-value">0.0m</div>
+        </div>
+      </div>
+
+      <!-- Center Warning Alert (Flashes when going too fast or near crash) -->
+      <div id="hud-alert" class="hud-alert-box hidden">
+        <div class="hazard-stripe"></div>
+        <div id="hud-alert-text" class="hud-alert-text">
+          WARNING: EXCESSIVE VELOCITY
+        </div>
+        <div class="hazard-stripe"></div>
+      </div>
+
+      <!-- Bottom Bar: Speeds, Controls & Health -->
+      <div class="hud-bottom">
+        <div class="hud-left">
+          <div class="hud-group">
+            <div class="hud-label">VEHICLE TILT</div>
+            <div id="hud-tilt" class="hud-value">PITCH: 0.0° | ROLL: 0.0°</div>
+          </div>
+          <div id="hud-handbrake" class="hud-indicator hidden">
+            HANDBRAKE ACTIVE
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="speedometer-container">
+            <span id="hud-speed" class="speed-number">0</span>
+            <span class="speed-unit">KM/H</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start / Instruction Screen -->
+    <div id="screen-start" class="screen-overlay">
+      <div class="screen-content">
+        <div class="hazard-border-top"></div>
+        <h1 class="glitch-text" data-text="WASTELAND CRUISE">
+          WASTELAND CRUISE
+        </h1>
+        <p class="subtitle">
+          TACTICAL RANGE ROVER TELEMETRY / DRIVE SIM v0.19.3
+        </p>
+
+        <div class="instructions">
+          <h3>SYSTEM INTERFACE CONTROL</h3>
+          <ul>
+            <li>
+              <span class="key">W</span> / <span class="key">▲</span> : THROTTLE
+            </li>
+            <li>
+              <span class="key">S</span> / <span class="key">▼</span> : REVERSE
+              / BRAKE
+            </li>
+            <li>
+              <span class="key">A</span> / <span class="key">◀</span> : STEER
+              LEFT
+            </li>
+            <li>
+              <span class="key">D</span> / <span class="key">▶</span> : STEER
+              RIGHT
+            </li>
+            <li><span class="key">SPACE</span> : DRIFT HANDBRAKE</li>
+            <li><span class="key">P</span> : PAUSE DIAGNOSTICS</li>
+          </ul>
+          <p class="warning-note">
+            CAUTION: HIGH-SPEED IMPACTS WITH ROCK STRUCTURES OR MONUMENTS WILL
+            RESULT IN TOTAL VEHICLE STRUCTURAL FAILURE.
+          </p>
+        </div>
+
+        <button id="btn-start" class="btn-primary">INITIALIZE SYSTEMS</button>
+        <div class="hazard-border-bottom"></div>
+      </div>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="screen-pause" class="screen-overlay hidden">
+      <div class="screen-content">
+        <div class="hazard-border-top"></div>
+        <h2>DIAGNOSTICS PAUSED</h2>
+        <p class="subtitle">DRIVETRAIN DISENGAGED</p>
+        <button id="btn-resume" class="btn-primary">RESUME OPERATION</button>
+        <div class="hazard-border-bottom"></div>
+      </div>
+    </div>
+
+    <!-- Crash / Explosion Screen -->
+    <div id="screen-crash" class="screen-overlay hidden">
+      <div class="screen-content alert-content">
+        <div class="hazard-stripe-flashing"></div>
+        <h1
+          class="crash-title glitch-text"
+          data-text="CRITICAL VEHICLE FAILURE"
+        >
+          CRITICAL VEHICLE FAILURE
+        </h1>
+        <p class="crash-subtitle">
+          STRUCTURAL INTEGRITY COMPROMISED - EXPLOSION DETECTED
+        </p>
+
+        <div class="session-stats">
+          <div class="stat-row">
+            <span class="stat-label">TOTAL DISTANCE TRAVELED:</span>
+            <span id="stat-dist" class="stat-val">0.0m</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">PEAK RECORDED VELOCITY:</span>
+            <span id="stat-speed" class="stat-val">0.0 km/h</span>
+          </div>
+        </div>
+
+        <button id="btn-restart" class="btn-danger">
+          REBOOT VEHICLE & RESTART [R]
+        </button>
+        <div class="hazard-stripe-flashing"></div>
+      </div>
+    </div>
+
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
