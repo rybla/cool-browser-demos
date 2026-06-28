@@ -1,0 +1,453 @@
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0b0914;
+  font-family: "Outfit", sans-serif;
+  color: #e2e8f0;
+}
+
+/* Canvas styling */
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* UI Overlay Container */
+#ui-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to canvas where needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Common Panel Layout (Start Screen & Crash Screen) */
+.panel {
+  display: none; /* Hidden by default */
+  pointer-events: auto; /* Re-enable clicks for active panels */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 520px;
+  margin: auto;
+  padding: 2.5rem;
+  background: rgba(15, 12, 30, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 240, 255, 0.05);
+  text-align: center;
+  animation: panel-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.panel.active {
+  display: flex;
+}
+
+@keyframes panel-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Start Screen specific styles */
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+  margin-bottom: 0.25rem;
+}
+
+.highlight {
+  color: #ff007f;
+  text-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+}
+
+.subtitle {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #a0aec0;
+  letter-spacing: 0.05em;
+  margin-bottom: 2rem;
+}
+
+/* Instructions card */
+.instructions-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: left;
+}
+
+.instructions-card h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #00f0ff;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.key-cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  background: #1a162b;
+  border: 1px solid #ff007f;
+  border-radius: 6px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ff007f;
+  box-shadow: 0 0 8px rgba(255, 0, 127, 0.2);
+  margin-right: 0.75rem;
+}
+
+.inline-key {
+  margin: 0 0.25rem;
+  min-width: 70px;
+}
+
+.action-desc {
+  font-size: 0.9rem;
+  color: #e2e8f0;
+}
+
+.safety-warning {
+  margin-top: 1.25rem;
+  font-size: 0.8rem;
+  color: #ffb703;
+  line-height: 1.4;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.75rem;
+}
+
+/* Buttons */
+.btn {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 100%;
+  padding: 1rem 2rem;
+  font-family: "Outfit", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00f0ff 0%, #0072ff 100%);
+  color: #040209;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff007f 0%, #7f00ff 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 0, 127, 0.3);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+}
+
+/* HUD Overlay Styles */
+.hud-container {
+  display: none; /* Shown dynamically when game starts */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  padding: 1.5rem;
+}
+
+.hud-container.active {
+  display: block;
+}
+
+/* Top bar stats */
+.hud-top-bar {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  pointer-events: auto;
+}
+
+.hud-stat-box {
+  background: rgba(15, 12, 30, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #a0aec0;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.15rem;
+}
+
+.stat-value {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 1.15rem;
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+/* Speedometer (bottom right) */
+.speedometer-container {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  width: 130px;
+  height: 130px;
+  background: rgba(15, 12, 30, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.speed-ring-svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Start ring at top */
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 6;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: url(#speedGrad); /* We will construct this gradient dynamically or use single color */
+  stroke: #00f0ff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.1s ease;
+  filter: drop-shadow(0 0 4px #00f0ff);
+}
+
+.speed-text-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.speed-num {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.speed-unit {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #00f0ff;
+  letter-spacing: 0.05em;
+  margin-top: 0.15rem;
+}
+
+/* Speed Glow under the car */
+.speed-glow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #00f0ff,
+    #ff007f,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 0 20px #00f0ff;
+}
+
+/* Crash Screen styles */
+.crash-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ff007f;
+  text-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.crash-subtitle {
+  font-size: 0.95rem;
+  color: #a0aec0;
+  margin-bottom: 1.75rem;
+}
+
+.stats-card {
+  width: 100%;
+  background: rgba(255, 0, 127, 0.04);
+  border: 1px solid rgba(255, 0, 127, 0.15);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-crash-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+.value-highlight {
+  font-family: "Share Tech Mono", monospace;
+  color: #00f0ff;
+  font-size: 1.1rem;
+}
+
+.restart-prompt {
+  font-size: 0.85rem;
+  color: #a0aec0;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Flicker animation for crashing */
+.animate-flicker {
+  animation: flicker 2s infinite alternate;
+}
+
+@keyframes flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+    text-shadow:
+      0 0 15px rgba(255, 0, 127, 0.8),
+      0 0 30px rgba(255, 0, 127, 0.4);
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.4;
+    text-shadow: none;
+  }
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 600px) {
+  #ui-container {
+    padding: 1rem;
+  }
+
+  .panel {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .speedometer-container {
+    bottom: 1rem;
+    right: 1rem;
+    width: 110px;
+    height: 110px;
+  }
+
+  .speed-num {
+    font-size: 1.8rem;
+  }
+}

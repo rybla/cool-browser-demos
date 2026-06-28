@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeoDrive - Infinite 3D Driving Simulator</title>
+    <meta
+      name="description"
+      content="An infinite, procedurally generated 3D low-poly driving simulation browser game."
+    />
+    <!-- Google Fonts for retro-cyber typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <!-- Main Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- UI Overlay Wrapper -->
+    <div id="ui-container">
+      <!-- START SCREEN -->
+      <div id="start-screen" class="panel active">
+        <h1 class="title">NEO<span class="highlight">DRIVE</span></h1>
+        <p class="subtitle">Infinite Low-Poly 3D Driving Simulation</p>
+
+        <div class="instructions-card">
+          <h3>CONTROLS</h3>
+          <div class="control-row">
+            <span class="key-cap">W</span> or <span class="key-cap">↑</span>
+            <span class="action-desc">Accelerate</span>
+          </div>
+          <div class="control-row">
+            <span class="key-cap">S</span> or <span class="key-cap">↓</span>
+            <span class="action-desc">Brake / Reverse</span>
+          </div>
+          <div class="control-row">
+            <span class="key-cap">A</span> / <span class="key-cap">D</span> or
+            <span class="key-cap">←</span> / <span class="key-cap">→</span>
+            <span class="action-desc">Steer Left / Right</span>
+          </div>
+          <div class="control-row">
+            <span class="key-cap">R</span>
+            <span class="action-desc">Quick Reset Car</span>
+          </div>
+          <p class="safety-warning">
+            ⚠️ WARNING: Hitting geometric pillars or terrain peaks at high speed
+            will disintegrate your vehicle!
+          </p>
+        </div>
+
+        <button id="start-button" class="btn btn-primary">
+          ENTER SIMULATION
+        </button>
+      </div>
+
+      <!-- DASHBOARD HUD -->
+      <div id="hud" class="hud-container">
+        <!-- Top Stats Bar -->
+        <div class="hud-top-bar">
+          <div class="hud-stat-box">
+            <span class="stat-label">DISTANCE</span>
+            <span id="stat-distance" class="stat-value">0.0 km</span>
+          </div>
+          <div class="hud-stat-box">
+            <span class="stat-label">ALTITUDE</span>
+            <span id="stat-altitude" class="stat-value">0 m</span>
+          </div>
+          <div class="hud-stat-box">
+            <span class="stat-label">MAX SPEED</span>
+            <span id="stat-max-speed" class="stat-value">0 km/h</span>
+          </div>
+        </div>
+
+        <!-- Speedometer Ring Gauges -->
+        <div class="speedometer-container">
+          <svg class="speed-ring-svg" viewBox="0 0 120 120">
+            <!-- Background Ring -->
+            <circle class="ring-bg" cx="60" cy="60" r="50" />
+            <!-- Active Fill Ring -->
+            <circle
+              id="speed-ring-fill"
+              class="ring-fill"
+              cx="60"
+              cy="60"
+              r="50"
+              stroke-dasharray="314.16"
+              stroke-dashoffset="314.16"
+            />
+          </svg>
+          <div class="speed-text-box">
+            <span id="speed-number" class="speed-num">000</span>
+            <span class="speed-unit">KM/H</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Speed Level Indicators / Sliders -->
+        <div id="speed-indicator-glow" class="speed-glow"></div>
+      </div>
+
+      <!-- CRASHED SCREEN -->
+      <div id="crash-screen" class="panel">
+        <h2 class="crash-title animate-flicker">VEHICLE EXPLODED</h2>
+        <p class="crash-subtitle">You impacted an obstacle at high velocity</p>
+
+        <div class="stats-card">
+          <div class="post-crash-stat">
+            <span>Terminal Speed:</span>
+            <strong id="crash-speed" class="value-highlight">0 km/h</strong>
+          </div>
+          <div class="post-crash-stat">
+            <span>Distance Driven:</span>
+            <strong id="crash-distance" class="value-highlight">0.0 km</strong>
+          </div>
+        </div>
+
+        <p class="restart-prompt">
+          Press <span class="key-cap inline-key">SPACEBAR</span> or click the
+          button below to rebuild your car
+        </p>
+        <button id="restart-button" class="btn btn-danger">
+          REBUILD VEHICLE
+        </button>
+      </div>
+    </div>
+
+    <!-- Script Entrypoint -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
