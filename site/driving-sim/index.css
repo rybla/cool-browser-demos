@@ -493,3 +493,26 @@ h2 {
   font-weight: bold;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
+
+.timer-group {
+  border-left: 4px solid #00ffcc;
+  border-color: rgba(0, 255, 204, 0.2);
+  min-width: 155px;
+}
+
+.timer-danger {
+  color: #ff3333 !important;
+  border-left-color: #ff3333 !important;
+  border-color: rgba(255, 51, 51, 0.4) !important;
+  text-shadow: 0 0 10px rgba(255, 51, 51, 0.85) !important;
+  animation: timer-pulse var(--pulse-speed, 0.5s) infinite alternate ease-in-out;
+}
+
+@keyframes timer-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(var(--pulse-scale, 1.15));
+  }
+}

@@ -461,6 +461,8 @@ class Game {
   private prevVelocity = new THREE.Vector2(0, 0);
   private carPitch = 0;
   private carRoll = 0;
+  private timeRemaining = 15.0;
+  private isTimeExpired = false;
 
   // Debris & Particles
   private debrisList: DebrisPiece[] = [];
@@ -882,8 +884,21 @@ class Game {
   }
 
   private updatePhysics(dt: number) {
-    if (this.isCrashed) {
-      // Just step physics without driving input (helps particles/debris fall)
+    // Countdown timer update
+    if (
+      this.isStarted &&
+      !this.isPaused &&
+      !this.isCrashed &&
+      !this.isTimeExpired
+    ) {
+      this.timeRemaining = Math.max(this.timeRemaining - dt, 0.0);
+      if (this.timeRemaining <= 0.0) {
+        this.triggerTimeExpired();
+      }
+    }
+
+    if (this.isCrashed || this.isTimeExpired) {
+      // Just step physics without driving input (helps particles/debris fall/car roll to stop)
       this.physicsWorld.step();
       return;
     }
@@ -1606,6 +1621,57 @@ class Game {
     spawnAtWheel(-1.15);
   }
 
+  private triggerTimeExpired() {
+    this.isTimeExpired = true;
+
+    // Shut down headlights
+    this.headLights.forEach((light) => {
+      light.visible = false;
+    });
+
+    // Apply braking resistance
+    this.carBody.setLinearDamping(3.5);
+    this.carBody.setAngvel(0.0, true);
+
+    // Show HUD red alert styling on the timer element
+    const timerBox = document.getElementById("timer-box");
+    if (timerBox) {
+      timerBox.classList.add("timer-danger");
+      timerBox.style.setProperty("--pulse-speed", "0.08s");
+      timerBox.style.setProperty("--pulse-scale", "1.25");
+    }
+
+    // Trigger overlay display after a short pause
+    setTimeout(() => {
+      const crashTitle = document.querySelector(
+        ".crash-title"
+      ) as HTMLHeadingElement;
+      const crashSubtitle = document.querySelector(
+        ".crash-subtitle"
+      ) as HTMLHeadingElement;
+      const btnRestart = document.getElementById("btn-restart");
+
+      if (crashTitle) {
+        crashTitle.innerText = "MISSION TIME EXPIRED";
+        crashTitle.setAttribute("data-text", "MISSION TIME EXPIRED");
+      }
+      if (crashSubtitle) {
+        crashSubtitle.innerText = "TELEMETRY LINK LOST - GENERATOR DRAINED";
+      }
+      if (btnRestart) {
+        btnRestart.innerText = "RECHARGE VEHICLE & RESTART [R]";
+      }
+
+      const distanceSpan = document.getElementById("stat-dist");
+      const speedSpan = document.getElementById("stat-speed");
+      if (distanceSpan)
+        distanceSpan.innerText = `${this.totalDistance.toFixed(1)}m`;
+      if (speedSpan) speedSpan.innerText = `${this.peakSpeed.toFixed(1)} km/h`;
+
+      document.getElementById("screen-crash")?.classList.remove("hidden");
+    }, 1500);
+  }
+
   private restartGame() {
     // 1. Remove debris pieces from main scene
     this.debrisList.forEach((piece) => {
@@ -1649,8 +1715,34 @@ class Game {
     this.carGroup.rotation.set(0, 0, 0);
     this.carGroup.visible = true;
 
+    // Reset crash screen titles in case they were modified by Time Out
+    const crashTitle = document.querySelector(
+      ".crash-title"
+    ) as HTMLHeadingElement;
+    const crashSubtitle = document.querySelector(
+      ".crash-subtitle"
+    ) as HTMLHeadingElement;
+    const btnRestart = document.getElementById("btn-restart");
+
+    if (crashTitle) {
+      crashTitle.innerText = "CRITICAL VEHICLE FAILURE";
+      crashTitle.setAttribute("data-text", "CRITICAL VEHICLE FAILURE");
+    }
+    if (crashSubtitle) {
+      crashSubtitle.innerText =
+        "STRUCTURAL INTEGRITY COMPROMISED - EXPLOSION DETECTED";
+    }
+    if (btnRestart) {
+      btnRestart.innerText = "REBOOT VEHICLE & RESTART [R]";
+    }
+
+    // Reset physics body linear damping to 0 for infinite acceleration
+    this.carBody.setLinearDamping(0.0);
+
     // 5. Reset states
     this.isCrashed = false;
+    this.isTimeExpired = false;
+    this.timeRemaining = 60.0;
     this.currentSpeed = 0;
     this.peakSpeed = 0;
     this.totalDistance = 0;
@@ -1658,9 +1750,16 @@ class Game {
     this.prevVelocity.set(0, 0);
     this.wheelSpinAngle = 0;
 
-    // Hide alerts & crash screen
+    // Hide alerts, crash screens & remove timer danger styles
     document.getElementById("screen-crash")?.classList.add("hidden");
     document.getElementById("hud-alert")?.classList.add("hidden");
+
+    const timerBox = document.getElementById("timer-box");
+    if (timerBox) {
+      timerBox.classList.remove("timer-danger");
+      timerBox.style.removeProperty("--pulse-speed");
+      timerBox.style.removeProperty("--pulse-scale");
+    }
 
     // Force chunk reload at origin
     this.lastChunkX = 99999;
@@ -1680,6 +1779,8 @@ class Game {
     const distSpan = document.getElementById("hud-dist");
     const tiltSpan = document.getElementById("hud-tilt");
     const speedSpan = document.getElementById("hud-speed");
+    const timerSpan = document.getElementById("hud-timer");
+    const timerBox = document.getElementById("timer-box");
 
     const pos = this.carBody.translation();
     const speedKmh = Math.round(Math.abs(this.currentSpeed) * 3.6);
@@ -1703,6 +1804,30 @@ class Game {
 
     if (speedSpan) {
       speedSpan.innerText = speedKmh.toString();
+    }
+
+    // Render countdown timer value
+    if (timerSpan) {
+      timerSpan.innerText = `${this.timeRemaining.toFixed(2)}s`;
+    }
+
+    // Dramatic red flashing timer scaling when less than 10 seconds remain
+    if (timerBox) {
+      if (this.timeRemaining < 10.0 && !this.isTimeExpired && !this.isCrashed) {
+        timerBox.classList.add("timer-danger");
+
+        // Scale frequency and amplitude of pulse countdown dynamically
+        const ratio = this.timeRemaining / 10.0; // 1.0 down to 0.0
+        const pulseSpeed = 0.08 + ratio * 0.42; // oscillates from 0.5s down to 0.08s (faster)
+        const pulseScale = 1.0 + (1.0 - ratio) * 0.22; // expands up to 1.22x (larger)
+
+        timerBox.style.setProperty("--pulse-speed", `${pulseSpeed}s`);
+        timerBox.style.setProperty("--pulse-scale", `${pulseScale}`);
+      } else if (!this.isTimeExpired) {
+        timerBox.classList.remove("timer-danger");
+        timerBox.style.removeProperty("--pulse-speed");
+        timerBox.style.removeProperty("--pulse-scale");
+      }
     }
   }
 }
