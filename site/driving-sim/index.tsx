@@ -407,7 +407,366 @@ class TerrainChunk {
 }
 
 // ==========================================
-// 3. MAIN GAME CONTROLLER
+// 3. PROGRAMMATIC AUDIO ENGINE (Web Audio API)
+// ==========================================
+
+class AudioController {
+  private ctx: AudioContext | null = null;
+
+  // Engine sound structures
+  private engineOsc: OscillatorNode | null = null;
+  private engineFilter: BiquadFilterNode | null = null;
+  private engineGain: GainNode | null = null;
+  private currentGear = 1;
+
+  // Tire slip / Braking noise structures
+  private noiseSource: AudioBufferSourceNode | null = null;
+  private screechFilter: BiquadFilterNode | null = null;
+  private screechGain: GainNode | null = null;
+
+  // High pitch wheel squeal
+  private squealOsc: OscillatorNode | null = null;
+  private squealGain: GainNode | null = null;
+
+  constructor() {}
+
+  public init() {
+    if (this.ctx) return;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    this.ctx = new AudioContextClass();
+    this.setupEngine();
+    this.setupScreech();
+  }
+
+  private setupEngine() {
+    if (!this.ctx) return;
+
+    this.engineOsc = this.ctx.createOscillator();
+    this.engineOsc.type = "sawtooth";
+
+    this.engineFilter = this.ctx.createBiquadFilter();
+    this.engineFilter.type = "lowpass";
+    this.engineFilter.frequency.value = 320; // Muffled base rumble
+
+    this.engineGain = this.ctx.createGain();
+    this.engineGain.gain.value = 0.0;
+
+    this.engineOsc.connect(this.engineFilter);
+    this.engineFilter.connect(this.engineGain);
+    this.engineGain.connect(this.ctx.destination);
+    this.engineOsc.start();
+  }
+
+  private setupScreech() {
+    if (!this.ctx) return;
+
+    // White noise buffer
+    const bufferSize = this.ctx.sampleRate * 2.0;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2.0 - 1.0;
+    }
+
+    this.noiseSource = this.ctx.createBufferSource();
+    this.noiseSource.buffer = buffer;
+    this.noiseSource.loop = true;
+
+    this.screechFilter = this.ctx.createBiquadFilter();
+    this.screechFilter.type = "bandpass";
+    this.screechFilter.Q.value = 4.0;
+    this.screechFilter.frequency.value = 950;
+
+    this.screechGain = this.ctx.createGain();
+    this.screechGain.gain.value = 0.0;
+
+    this.noiseSource.connect(this.screechFilter);
+    this.screechFilter.connect(this.screechGain);
+    this.screechGain.connect(this.ctx.destination);
+    this.noiseSource.start();
+
+    // High squeal tone
+    this.squealOsc = this.ctx.createOscillator();
+    this.squealOsc.type = "triangle";
+    this.squealOsc.frequency.value = 1400;
+
+    this.squealGain = this.ctx.createGain();
+    this.squealGain.gain.value = 0.0;
+
+    this.squealOsc.connect(this.squealGain);
+    this.squealGain.connect(this.ctx.destination);
+    this.squealOsc.start();
+  }
+
+  public updateEngineSound(speed: number, throttle: number) {
+    if (!this.ctx || !this.engineOsc || !this.engineGain || !this.engineFilter)
+      return;
+
+    const absSpeed = Math.abs(speed);
+
+    // Compute Gear & RPM ratio
+    let gear: number;
+    let ratio: number;
+    if (absSpeed < 10) {
+      gear = 1;
+      ratio = absSpeed / 10;
+    } else if (absSpeed < 25) {
+      gear = 2;
+      ratio = (absSpeed - 10) / 15;
+    } else if (absSpeed < 50) {
+      gear = 3;
+      ratio = (absSpeed - 25) / 25;
+    } else if (absSpeed < 85) {
+      gear = 4;
+      ratio = (absSpeed - 50) / 35;
+    } else {
+      gear = 5;
+      ratio = Math.min((absSpeed - 85) / 150, 1.0);
+    }
+
+    const gearRanges = [
+      { min: 55, max: 110 }, // Gear 1
+      { min: 70, max: 140 }, // Gear 2
+      { min: 85, max: 175 }, // Gear 3
+      { min: 100, max: 210 }, // Gear 4
+      { min: 115, max: 250 }, // Gear 5
+    ];
+
+    const range = gearRanges[gear - 1] || { min: 100, max: 200 };
+    const targetFreq = range.min + ratio * (range.max - range.min);
+
+    // Shift gear clutch dip
+    if (gear !== this.currentGear) {
+      this.currentGear = gear;
+      this.engineOsc.frequency.cancelScheduledValues(this.ctx.currentTime);
+      this.engineOsc.frequency.setValueAtTime(
+        range.min * 0.72,
+        this.ctx.currentTime
+      );
+      this.engineOsc.frequency.exponentialRampToValueAtTime(
+        targetFreq,
+        this.ctx.currentTime + 0.22
+      );
+    } else {
+      this.engineOsc.frequency.setTargetAtTime(
+        targetFreq,
+        this.ctx.currentTime,
+        0.08
+      );
+    }
+
+    // Engine filter load: sounds deeper when accelerating
+    const filterFreq = 260 + (throttle > 0 ? 280 : 0) + ratio * 350;
+    this.engineFilter.frequency.setTargetAtTime(
+      filterFreq,
+      this.ctx.currentTime,
+      0.1
+    );
+
+    // Volume curves
+    const baseVol = 0.12;
+    const throttleVol = throttle > 0 ? 0.08 : 0.03;
+    const targetVol = baseVol + throttleVol + ratio * 0.06;
+    this.engineGain.gain.setTargetAtTime(targetVol, this.ctx.currentTime, 0.1);
+  }
+
+  public updateScreech(lateralSpeed: number, isBraking: boolean) {
+    if (
+      !this.ctx ||
+      !this.screechGain ||
+      !this.screechFilter ||
+      !this.squealGain ||
+      !this.squealOsc
+    )
+      return;
+
+    const absLat = Math.abs(lateralSpeed);
+
+    let screechVol = 0.0;
+    let squealVol = 0.0;
+    let screechFreq = 950;
+    let squealFreq = 1400;
+
+    if (absLat > 2.8) {
+      // Drifting slide
+      const factor = Math.min((absLat - 2.8) / 15.0, 1.0);
+      screechVol = 0.08 + factor * 0.28;
+      squealVol = 0.02 + factor * 0.07;
+
+      screechFreq = 950 + factor * 750;
+      squealFreq = 1400 + factor * 800;
+    }
+
+    if (isBraking) {
+      screechVol = Math.max(screechVol, 0.18);
+      screechFreq = Math.max(screechFreq, 750);
+    }
+
+    this.screechGain.gain.setTargetAtTime(
+      screechVol,
+      this.ctx.currentTime,
+      0.08
+    );
+    this.screechFilter.frequency.setTargetAtTime(
+      screechFreq,
+      this.ctx.currentTime,
+      0.08
+    );
+
+    this.squealGain.gain.setTargetAtTime(squealVol, this.ctx.currentTime, 0.08);
+    this.squealOsc.frequency.setTargetAtTime(
+      squealFreq,
+      this.ctx.currentTime,
+      0.08
+    );
+  }
+
+  public playBeep() {
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = 980;
+
+    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.09);
+  }
+
+  public playExplosion() {
+    if (!this.ctx) return;
+
+    // Shut down engine / screech
+    if (this.engineGain) this.engineGain.gain.value = 0.0;
+    if (this.screechGain) this.screechGain.gain.value = 0.0;
+    if (this.squealGain) this.squealGain.gain.value = 0.0;
+
+    // Base rumble
+    const rumble = this.ctx.createOscillator();
+    const rumbleGain = this.ctx.createGain();
+    rumble.type = "sawtooth";
+    rumble.frequency.setValueAtTime(200, this.ctx.currentTime);
+    rumble.frequency.exponentialRampToValueAtTime(
+      25,
+      this.ctx.currentTime + 1.2
+    );
+
+    rumbleGain.gain.setValueAtTime(0.45, this.ctx.currentTime);
+    rumbleGain.gain.exponentialRampToValueAtTime(
+      0.01,
+      this.ctx.currentTime + 1.5
+    );
+
+    rumble.connect(rumbleGain);
+    rumbleGain.connect(this.ctx.destination);
+    rumble.start();
+    rumble.stop(this.ctx.currentTime + 1.6);
+
+    // Blast noise buffer
+    const bufferSize = this.ctx.sampleRate * 1.5;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2.0 - 1.0;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(550, this.ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(
+      60,
+      this.ctx.currentTime + 1.0
+    );
+
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.55, this.ctx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(
+      0.01,
+      this.ctx.currentTime + 1.3
+    );
+
+    noise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(this.ctx.destination);
+    noise.start();
+  }
+
+  public playShutdown() {
+    if (!this.ctx) return;
+
+    if (this.engineGain)
+      this.engineGain.gain.setTargetAtTime(0.0, this.ctx.currentTime, 0.2);
+    if (this.screechGain)
+      this.screechGain.gain.setTargetAtTime(0.0, this.ctx.currentTime, 0.2);
+    if (this.squealGain)
+      this.squealGain.gain.setTargetAtTime(0.0, this.ctx.currentTime, 0.2);
+
+    // Generator shut down hum
+    const sweep = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    sweep.type = "sine";
+    sweep.frequency.setValueAtTime(620, this.ctx.currentTime);
+    sweep.frequency.exponentialRampToValueAtTime(
+      30,
+      this.ctx.currentTime + 1.3
+    );
+
+    gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 1.4);
+
+    sweep.connect(gain);
+    gain.connect(this.ctx.destination);
+    sweep.start();
+    sweep.stop(this.ctx.currentTime + 1.5);
+  }
+
+  public playStartup() {
+    if (!this.ctx) return;
+
+    const chime = (freq: number, start: number, duration: number) => {
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, this.ctx!.currentTime + start);
+
+      gain.gain.setValueAtTime(0.0, this.ctx!.currentTime);
+      gain.gain.setValueAtTime(0.18, this.ctx!.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(
+        0.01,
+        this.ctx!.currentTime + start + duration
+      );
+
+      osc.connect(gain);
+      gain.connect(this.ctx!.destination);
+
+      osc.start(this.ctx!.currentTime + start);
+      osc.stop(this.ctx!.currentTime + start + duration + 0.1);
+    };
+
+    chime(330, 0.0, 0.15); // E4
+    chime(440, 0.12, 0.15); // A4
+    chime(660, 0.24, 0.35); // E5
+  }
+}
+
+// ==========================================
+// 4. MAIN GAME CONTROLLER
 // ==========================================
 
 class Game {
@@ -461,8 +820,10 @@ class Game {
   private prevVelocity = new THREE.Vector2(0, 0);
   private carPitch = 0;
   private carRoll = 0;
-  private timeRemaining = 15.0;
+  private timeRemaining = 60.0;
   private isTimeExpired = false;
+  private lastSecBeep = -1;
+  private audioController = new AudioController();
 
   // Debris & Particles
   private debrisList: DebrisPiece[] = [];
@@ -783,6 +1144,8 @@ class Game {
     ) as HTMLButtonElement;
 
     btnStart.addEventListener("click", () => {
+      this.audioController.init();
+      this.audioController.playStartup();
       this.isStarted = true;
       document.getElementById("screen-start")?.classList.add("hidden");
       document.getElementById("hud")?.classList.remove("hidden");
@@ -895,6 +1258,16 @@ class Game {
       if (this.timeRemaining <= 0.0) {
         this.triggerTimeExpired();
       }
+
+      const currentSec = Math.floor(this.timeRemaining);
+      if (
+        currentSec !== this.lastSecBeep &&
+        this.timeRemaining < 10.0 &&
+        this.timeRemaining > 0
+      ) {
+        this.lastSecBeep = currentSec;
+        this.audioController.playBeep();
+      }
     }
 
     if (this.isCrashed || this.isTimeExpired) {
@@ -933,7 +1306,7 @@ class Game {
     const handbrake = !!this.keys[" "];
 
     // Constant thrust engine acceleration allowing infinite speed (accelerates forever)
-    const baseAccel = 35.0; // High constant acceleration power
+    const baseAccel = 15.0; // High constant acceleration power
     const driveForce = throttleInput * baseAccel * this.carBody.mass();
 
     if (throttleInput !== 0) {
@@ -1034,6 +1407,10 @@ class Game {
     if (isSliding) {
       this.spawnDriftDust(lateralSpeed);
     }
+
+    // Programmatic audio updates
+    this.audioController.updateEngineSound(this.currentSpeed, throttleInput);
+    this.audioController.updateScreech(lateralSpeed, isBraking);
 
     // Apply slope gravity force pulling the car downhill (negative gradient of terrain height)
     const translation = this.carBody.translation();
@@ -1243,6 +1620,7 @@ class Game {
 
   private triggerCrash(linVel: RAPIER.Vector) {
     this.isCrashed = true;
+    this.audioController.playExplosion();
 
     // Hide lights
     this.headLights.forEach((light) => {
@@ -1623,6 +2001,7 @@ class Game {
 
   private triggerTimeExpired() {
     this.isTimeExpired = true;
+    this.audioController.playShutdown();
 
     // Shut down headlights
     this.headLights.forEach((light) => {
@@ -1673,6 +2052,9 @@ class Game {
   }
 
   private restartGame() {
+    this.audioController.playStartup();
+    this.lastSecBeep = -1;
+
     // 1. Remove debris pieces from main scene
     this.debrisList.forEach((piece) => {
       this.scene.remove(piece.mesh);
