@@ -114,7 +114,7 @@ function sampleHeight(x: number, z: number): number {
 
 const CHUNK_SIZE = 120;
 const CHUNK_SEGMENTS = 30;
-const CHUNK_RADIUS = 3; // Number of chunks loaded around player in each direction
+const CHUNK_RADIUS = 5; // Number of chunks loaded around player in each direction
 
 interface DebrisPiece {
   mesh: THREE.Object3D;
@@ -855,7 +855,7 @@ class Game {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0a0c10);
     // Dense gritty dark atmospheric fog
-    this.scene.fog = new THREE.FogExp2(0x0a0c10, 0.015);
+    this.scene.fog = new THREE.FogExp2(0x0a0c10, 0.0055);
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(
