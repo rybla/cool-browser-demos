@@ -1702,7 +1702,7 @@ class GameEngine {
       visited: depth === 0,
       group: new THREE.Group(),
       wallColliders: [],
-      floorCenter: new THREE.Vector3(gx * 30, 0, gy * 30),
+      floorCenter: new THREE.Vector3(gx * 24, 0, gy * 24),
     };
   }
 
@@ -1880,10 +1880,10 @@ class GameEngine {
       bands2.position.y = 1.5;
       doorMesh.add(bands2);
 
-      if (dirKey === "N") doorMesh.position.set(0, 0, 12);
-      if (dirKey === "S") doorMesh.position.set(0, 0, -12);
-      if (dirKey === "E") doorMesh.position.set(12, 0, 0);
-      if (dirKey === "W") doorMesh.position.set(-12, 0, 0);
+      if (dirKey === "N") doorMesh.position.set(0, 0, 11.98);
+      if (dirKey === "S") doorMesh.position.set(0, 0, -11.98);
+      if (dirKey === "E") doorMesh.position.set(11.98, 0, 0);
+      if (dirKey === "W") doorMesh.position.set(-11.98, 0, 0);
 
       room.group.add(doorMesh);
       door.mesh = doorMesh;
@@ -2736,9 +2736,9 @@ class GameEngine {
         }
       }
 
-      const roomX = Math.round(pos.x / 30);
-      const roomZ = Math.round(pos.y / 30);
-      const cellCenter = new THREE.Vector2(roomX * 30, roomZ * 30);
+      const roomX = Math.round(pos.x / 24);
+      const roomZ = Math.round(pos.y / 24);
+      const cellCenter = new THREE.Vector2(roomX * 24, roomZ * 24);
       if (
         Math.abs(pos.x - cellCenter.x) > 11.5 ||
         Math.abs(pos.y - cellCenter.y) > 11.5
@@ -2759,8 +2759,8 @@ class GameEngine {
 
   private updateRoomStatusAndEnemies(dt: number) {
     const pPos = this.playerBody.translation();
-    const grx = Math.round(pPos.x / 30);
-    const gry = Math.round(pPos.y / 30);
+    const grx = Math.round(pPos.x / 24);
+    const gry = Math.round(pPos.y / 24);
     const newKey = `${grx},${gry}`;
 
     const room = this.rooms.get(newKey);
@@ -3994,7 +3994,7 @@ class GameEngine {
       if (closestItem.type === "potion")
         itName = POTIONS[closestItem.itemType]!.name;
 
-      prompt.innerText = `Press [E] to Pick Up ${itName}`;
+      prompt.innerText = `[E] ${itName}`;
 
       const tempV = new THREE.Vector3(
         closestItem.mesh.position.x,
@@ -4024,8 +4024,8 @@ class GameEngine {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const pPos = this.playerBody.translation();
-    const p_gx = Math.round(pPos.x / 30);
-    const p_gy = Math.round(pPos.y / 30);
+    const p_gx = Math.round(pPos.x / 24);
+    const p_gy = Math.round(pPos.y / 24);
 
     const cW = canvas.width;
     const cH = canvas.height;
