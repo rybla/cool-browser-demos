@@ -3,10 +3,170 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ortho Dungeon Crawler</title>
     <link rel="stylesheet" href="./index.css" />
+    <!-- Google Fonts for high-fantasy premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Metamorphous&family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
+    <!-- The main 3D canvas -->
     <canvas id="canvas"></canvas>
+
+    <!-- Overlay HUD -->
+    <div id="hud">
+      <!-- Player Stats -->
+      <div class="hud-panel" id="stats-panel">
+        <h2 id="room-name">Dungeon Entry</h2>
+        <div class="stat-container">
+          <span class="stat-label">HP</span>
+          <div class="bar-bg">
+            <div
+              id="hp-bar"
+              class="bar-fill hp-gradient"
+              style="width: 100%"
+            ></div>
+            <span id="hp-text" class="bar-text">100 / 100</span>
+          </div>
+        </div>
+        <div class="stat-container">
+          <span class="stat-label">STAMINA</span>
+          <div class="bar-bg">
+            <div
+              id="stamina-bar"
+              class="bar-fill stamina-gradient"
+              style="width: 100%"
+            ></div>
+            <span id="stamina-text" class="bar-text">100 / 100</span>
+          </div>
+        </div>
+        <div id="room-status" class="room-status-badge">UNLOCKED</div>
+      </div>
+
+      <!-- Inventory Slot Panel -->
+      <div id="slots-panel">
+        <!-- Weapon Slot -->
+        <div class="item-slot" id="slot-weapon">
+          <div class="slot-key">J</div>
+          <div class="slot-icon" id="icon-weapon">⚔️</div>
+          <div class="slot-info">
+            <span class="slot-label">WEAPON</span>
+            <span class="slot-value" id="val-weapon">Empty Hand</span>
+          </div>
+        </div>
+        <!-- Shield Slot -->
+        <div class="item-slot" id="slot-shield">
+          <div class="slot-key">K</div>
+          <div class="slot-icon" id="icon-shield">🛡️</div>
+          <div class="slot-info">
+            <span class="slot-label">SHIELD</span>
+            <span class="slot-value" id="val-shield">Empty Hand</span>
+          </div>
+        </div>
+        <!-- Potion Slot -->
+        <div class="item-slot" id="slot-potion">
+          <div class="slot-key">P</div>
+          <div class="slot-icon" id="icon-potion">🧪</div>
+          <div class="slot-info">
+            <span class="slot-label">POTION</span>
+            <span class="slot-value" id="val-potion">None</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minimap Container -->
+      <div id="minimap-container">
+        <canvas id="minimap-canvas" width="160" height="160"></canvas>
+        <div id="minimap-info">Level: 1</div>
+      </div>
+    </div>
+
+    <!-- Screen Messages (e.g. ROOM CLEARED, INTERACTION PROMPT) -->
+    <div id="screen-alerts">
+      <div id="alert-banner" class="hidden">ROOM CLEARED</div>
+      <div id="interaction-prompt" class="hidden">Press [E] to Pick Up</div>
+    </div>
+
+    <!-- Pause Menu Modal -->
+    <div id="pause-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h1 class="fantasy-title">GAME PAUSED</h1>
+        <hr class="separator" />
+
+        <div class="instructions-grid">
+          <div class="instruction-group">
+            <h3>Movement</h3>
+            <p><strong>W, A, S, D</strong> - Walk</p>
+            <p><strong>SHIFT</strong> - Hold to Sprint</p>
+          </div>
+          <div class="instruction-group">
+            <h3>Combat & Interaction</h3>
+            <p><strong>J</strong> - Use Weapon (Swing/Shoot)</p>
+            <p><strong>K</strong> - Raise Shield (Hold to Block)</p>
+            <p><strong>P</strong> - Drink Potion</p>
+            <p><strong>E</strong> - Interact / Pick Up Item</p>
+          </div>
+        </div>
+
+        <hr class="separator" />
+
+        <div class="control-row">
+          <label for="volume-slider">Synth Volume</label>
+          <input type="range" id="volume-slider" min="0" max="100" value="30" />
+        </div>
+
+        <div class="modal-buttons">
+          <button id="btn-resume" class="btn">Resume Game</button>
+          <button id="btn-restart-pause" class="btn btn-secondary">
+            Restart
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen Modal -->
+    <div id="gameover-modal" class="modal-overlay hidden">
+      <div class="modal-content death-content">
+        <h1 class="fantasy-title death-title">YOU DIED</h1>
+        <p class="death-subtitle">Your soul remains in the dungeon...</p>
+
+        <div class="stats-summary">
+          <p>Rooms Explored: <span id="stat-rooms">0</span></p>
+          <p>Enemies Defeated: <span id="stat-enemies">0</span></p>
+          <p>Deepest Room: <span id="stat-deepest">0</span></p>
+          <p>Best Item Found: <span id="stat-best-item">None</span></p>
+        </div>
+
+        <div class="modal-buttons">
+          <button id="btn-respawn" class="btn btn-death">Try Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Victory Screen Modal -->
+    <div id="victory-modal" class="modal-overlay hidden">
+      <div class="modal-content victory-content">
+        <h1 class="fantasy-title victory-title">VICTORY</h1>
+        <p class="victory-subtitle">You have conquered the Ortho Dungeon!</p>
+
+        <div class="stats-summary">
+          <p>Total Rooms Cleared: <span id="stat-victory-rooms">0</span></p>
+          <p>Enemies Slain: <span id="stat-victory-enemies">0</span></p>
+          <p>Time Elapsed: <span id="stat-victory-time">0s</span></p>
+        </div>
+
+        <div class="modal-buttons">
+          <button id="btn-victory-restart" class="btn btn-victory">
+            Return to Start
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
