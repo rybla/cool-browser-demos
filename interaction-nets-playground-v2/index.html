@@ -1,0 +1,4406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interaction Nets Playground</title>
+    
+    <!-- Google Fonts: Inter and Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  <style>/* site/interaction-nets-playground-v2/index.css */
+:root {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #131a2c;
+  --bg-glass: #0f172aa6;
+  --bg-glass-inset: #1e293b73;
+  --border-color: #ffffff14;
+  --border-color-focus: #ffffff40;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-color: #3b82f6;
+  --accent-glow: #3b82f673;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --font-family: "Inter", sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --shadow-premium: 0 10px 30px -10px #00000080, 0 1px 1px 0 #ffffff0d inset;
+  --shadow-glow: 0 0 20px #3b82f633;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-premium);
+}
+
+.glass-inset {
+  background: var(--bg-glass-inset);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #ffffff0a;
+  border-radius: 12px;
+}
+
+.sidebar {
+  display: flex;
+  overflow-y: auto;
+  z-index: 10;
+  border-right: 1px solid var(--border-color);
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 24px;
+  width: 380px;
+  height: 100%;
+  padding: 24px;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: none;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #ffffff1a;
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #fff3;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logo {
+  display: flex;
+  align-items:  center;
+  gap: 12px;
+}
+
+.logo-icon {
+  color: var(--accent-color);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  animation: logo-pulse 4s infinite ease-in-out;
+}
+
+@keyframes logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--accent-glow));
+  }
+
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px var(--accent-glow));
+  }
+}
+
+.logo h1 {
+  font-family: var(--font-display);
+  letter-spacing: -.5px;
+  background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section h2 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+select {
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background: #0f172acc;
+  border-radius: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  transition: all .2s;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px #3b82f626;
+}
+
+.select-wrapper:after {
+  content: "▼";
+  color: var(--text-secondary);
+  position: absolute;
+  pointer-events: none;
+  font-size: 10px;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.toolbar-modes {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+#btn-mode-select {
+  grid-column: span 2;
+}
+
+.tool-btn {
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  cursor: pointer;
+  display: flex;
+  user-select: none;
+  background: #1e293b66;
+  border-radius: 10px;
+  align-items:  center;
+  gap: 8px;
+  padding: 10px 14px;
+  transition: all .2s;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tool-btn:hover {
+  color: var(--text-primary);
+  background: #3b82f614;
+  border-color: #3b82f64d;
+}
+
+.tool-btn.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px #3b82f659;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+.cell-library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.lib-card {
+  display: flex;
+  border: 1.5px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  background: #1e293b4d;
+  border-radius: 12px;
+  flex-direction: column;
+  justify-content: center;
+  align-items:  center;
+  gap: 8px;
+  padding: 12px 6px;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+}
+
+.lib-card:hover {
+  background: #ffffff0a;
+  border-color: #fff3;
+  transform: translateY(-2px);
+}
+
+.lib-card.active {
+  border-color: var(--accent-color);
+  background: #3b82f61f;
+  box-shadow: 0 0 10px #3b82f633;
+}
+
+.lib-svg {
+  filter: drop-shadow(0 2px 4px #0000004d);
+  width: 32px;
+  height: 32px;
+}
+
+.lib-name {
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lib-arity {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background: #00000040;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.stats-panel {
+  display: flex;
+  border: 1px solid var(--border-color);
+  background: #0f172a66;
+  border-radius: 10px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+}
+
+.stat-row {
+  display: flex;
+  color: var(--text-secondary);
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.stat-row strong {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.stat-row .highlight-stat {
+  color: var(--accent-warning);
+  text-shadow: 0 0 8px #f59e0b4d;
+  font-weight: 700;
+}
+
+.system-info {
+  display: flex;
+  border-radius: 12px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.system-info h3 {
+  font-family: var(--font-display);
+  color: var(--accent-color);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.system-info-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.viewport {
+  position: relative;
+  background-color: var(--bg-primary);
+  flex-grow: 1;
+  height: 100%;
+}
+
+.svg-canvas {
+  cursor: grab;
+}
+
+.svg-canvas:active {
+  cursor: grabbing;
+}
+
+.wire-path {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke .25s, stroke-width .2s;
+}
+
+.wire-path:hover {
+  stroke: #fff;
+  stroke-width: 4;
+}
+
+.wire-path.active {
+  stroke: var(--accent-warning);
+  stroke-width: 3.5;
+  animation: active-wire-pulse 2s infinite ease-in-out;
+  filter: url("#glow-sm");
+}
+
+@keyframes active-wire-pulse {
+  0%, 100% {
+    stroke-opacity: .8;
+    stroke-width: 3;
+  }
+
+  50% {
+    stroke-opacity: 1;
+    stroke-width: 4.5;
+  }
+}
+
+.port-dot {
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.4,0,.2,1), fill .2s, r .2s;
+}
+
+.port-dot:hover {
+  stroke: #fff;
+  stroke-width: 1.5;
+  transform: scale(1.5);
+}
+
+.port-dot.principal {
+  fill: #ffedd5;
+  stroke: var(--accent-warning);
+  stroke-width: 1.5;
+}
+
+.port-dot.auxiliary {
+  fill: #e2e8f0;
+  stroke: #00000080;
+  stroke-width: 1;
+}
+
+.active-pair-glow {
+  fill: none;
+  stroke: var(--accent-warning);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+  animation: rotate-glow 10s linear infinite;
+}
+
+@keyframes rotate-glow {
+  to {
+    stroke-dashoffset: 60;
+  }
+}
+
+.free-port-node {
+  fill: var(--bg-secondary);
+  stroke: var(--text-secondary);
+  stroke-width: 2.5;
+  cursor: pointer;
+  transition: stroke .2s, fill .2s, r .2s;
+}
+
+.free-port-node:hover {
+  stroke: #fff;
+  fill: var(--accent-color);
+  r: 10px;
+}
+
+.free-port-node.selected {
+  stroke: var(--accent-color);
+  fill: #3b82f666;
+  box-shadow: var(--shadow-glow);
+}
+
+.controls-panel {
+  position: absolute;
+  display: flex;
+  z-index: 100;
+  border-radius: 16px;
+  align-items:  center;
+  gap: 16px;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: calc(100% - 48px);
+  padding: 12px 24px;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.control-group {
+  display: flex;
+  align-items:  center;
+  gap: 8px;
+}
+
+.control-group.flex-col {
+  flex-direction: column;
+  align-items:  flex-start;
+  gap: 4px;
+}
+
+.control-divider {
+  background-color: var(--border-color);
+  width: 1px;
+  height: 32px;
+}
+
+.btn {
+  font-family: var(--font-family);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  border: 1px solid #0000;
+  border-radius: 8px;
+  padding: 10px 16px;
+  transition: all .15s;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px #3b82f64d;
+}
+
+.btn-secondary {
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background: #ffffff0f;
+}
+
+.btn-secondary:hover {
+  background: #ffffff1a;
+  border-color: #fff3;
+}
+
+.btn-danger {
+  color: #fca5a5;
+  background: #ef444426;
+  border: 1px solid #ef44444d;
+}
+
+.btn-danger:hover {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: #fff;
+  box-shadow: 0 4px 12px #ef44444d;
+}
+
+.control-btn {
+  font-family: var(--font-family);
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  user-select: none;
+  border: 1px solid #0000;
+  border-radius: 8px;
+  align-items:  center;
+  gap: 6px;
+  padding: 10px 16px;
+  transition: all .15s;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.control-btn.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.control-btn.btn-primary:hover {
+  background: #2563eb;
+}
+
+.control-btn.btn-secondary {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  background: #ffffff0f;
+}
+
+.control-btn.btn-secondary:hover {
+  background: #ffffff1a;
+  border-color: #fff3;
+}
+
+.control-btn.btn-danger {
+  color: #fca5a5;
+  background: #ef444426;
+  border-color: #ef44444d;
+}
+
+.control-btn.btn-danger:hover {
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: #fff;
+}
+
+.control-btn.toggle-btn {
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  background: #ffffff0a;
+}
+
+.control-btn.toggle-btn.active {
+  color: #a7f3d0;
+  background: #10b98126;
+  border-color: #10b98166;
+}
+
+.speed-label {
+  display: flex;
+  color: var(--text-secondary);
+  justify-content: space-between;
+  width: 140px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.speed-label span:last-child {
+  font-family: var(--font-mono);
+  color: var(--accent-color);
+}
+
+.speed-slider {
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background: #ffffff1a;
+  border-radius: 2px;
+  width: 140px;
+  height: 4px;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  appearance: none;
+  background: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  transition: transform .1s;
+}
+
+.speed-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.toast {
+  position: absolute;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--accent-color);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-premium), var(--shadow-glow);
+  z-index: 1000;
+  opacity: 1;
+  background: #0f172ad9;
+  border-radius: 10px;
+  padding: 12px 20px;
+  transition: opacity .3s, transform .3s cubic-bezier(.175,.885,.32,1.275);
+  font-size: 13px;
+  font-weight: 500;
+  top: 24px;
+  right: 24px;
+  transform: translateY(0);
+}
+
+.toast.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px);
+}
+
+.cell-triangle {
+  fill-opacity: .15;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 4px #00000040);
+  transition: stroke .2s, fill-opacity .2s, stroke-width .2s;
+}
+
+.cell-g:hover .cell-triangle {
+  fill-opacity: .3;
+  stroke-width: 3.5;
+}
+
+.cell-g.selected .cell-triangle {
+  stroke-width: 4px;
+  stroke-dasharray: none;
+  fill-opacity: .35;
+}
+
+.cell-label-text {
+  font-family: var(--font-display);
+  fill: var(--text-primary);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 1px 3px #0009;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.drag-wire-temp {
+  fill: none;
+  stroke: var(--accent-color);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.redex-halo {
+  animation: pulse-halo 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-halo {
+  0% {
+    transform: scale(1);
+    opacity: .2;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: .6;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: .2;
+  }
+}
+
+.particle {
+  pointer-events: none;
+  animation: particle-fade .5s ease-out forwards;
+}
+
+@keyframes particle-fade {
+  to {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+</style></head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar Panel -->
+      <aside class="sidebar glass">
+        <header class="app-header">
+          <div class="logo">
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              class="logo-icon"
+            >
+              <path
+                d="M12 2L2 19h20L12 2z"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+              <circle
+                cx="12"
+                cy="13"
+                r="3"
+                fill="currentColor"
+                fill-opacity="0.2"
+              />
+            </svg>
+            <h1>Antigravity Nets</h1>
+          </div>
+          <p class="subtitle">Interaction Nets Playground</p>
+        </header>
+
+        <!-- System Selection Section -->
+        <section class="section">
+          <h2>Select System</h2>
+          <div class="select-wrapper">
+            <select id="system-select">
+              <option value="combinators">Interaction Combinators</option>
+              <option value="arithmetic">Interaction Arithmetic</option>
+              <option value="logic">Boolean Logic Circuits</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Editor Toolbar Section -->
+        <section class="section">
+          <h2>Editor Mode</h2>
+          <div class="button-grid toolbar-modes">
+            <button
+              id="btn-mode-select"
+              class="tool-btn active"
+              title="Select and drag cells and free ports"
+            >
+              <span class="btn-icon">➔</span> Move / Select
+            </button>
+            <button
+              id="btn-mode-add-cell"
+              class="tool-btn"
+              title="Click on canvas to add cells"
+            >
+              <span class="btn-icon">▲</span> Add Cell
+            </button>
+            <button
+              id="btn-mode-add-wire"
+              class="tool-btn"
+              title="Drag from port to port to wire them"
+            >
+              <span class="btn-icon">🔗</span> Add Wire
+            </button>
+            <button
+              id="btn-mode-add-free"
+              class="tool-btn"
+              title="Click on canvas to add a free boundary port"
+            >
+              <span class="btn-icon">●</span> Add Free Port
+            </button>
+            <button
+              id="btn-mode-delete"
+              class="tool-btn"
+              title="Click elements to delete them"
+            >
+              <span class="btn-icon">✕</span> Delete Tool
+            </button>
+          </div>
+        </section>
+
+        <!-- Dynamic Cell Library based on Selected System -->
+        <section class="section">
+          <h2>Cell Library</h2>
+          <div id="cell-library" class="cell-library-grid">
+            <!-- Dynamic elements will be loaded here via JS -->
+          </div>
+        </section>
+
+        <!-- Preset / Examples Section -->
+        <section class="section">
+          <h2>Presets &amp; Examples</h2>
+          <div class="select-wrapper">
+            <select id="preset-select">
+              <!-- Dynamically populated based on system -->
+            </select>
+          </div>
+          <button
+            id="btn-load-preset"
+            class="btn btn-secondary"
+            style="width: 100%; margin-top: 10px"
+          >
+            Load Preset
+          </button>
+        </section>
+
+        <!-- Net Statistics and Diagnostic Section -->
+        <section class="section stats-section">
+          <h2>Net Statistics</h2>
+          <div class="stats-panel">
+            <div class="stat-row">
+              <span>Cells:</span> <strong id="stat-cells">0</strong>
+            </div>
+            <div class="stat-row">
+              <span>Wires:</span> <strong id="stat-wires">0</strong>
+            </div>
+            <div class="stat-row">
+              <span>Free Ports:</span> <strong id="stat-free-ports">0</strong>
+            </div>
+            <div class="stat-row">
+              <span>Active Pairs (Redexes):</span>
+              <strong id="stat-active-pairs" class="highlight-stat">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- System Rules Help Panel -->
+        <section class="section system-info glass-inset">
+          <h3 id="system-info-title">System Info</h3>
+          <div id="system-info-desc" class="system-info-text">
+            Loading info...
+          </div>
+        </section>
+      </aside>
+
+      <!-- Main Visualizing Area -->
+      <main class="viewport">
+        <!-- SVG Container for Nets -->
+        <svg id="svg-viewport" class="svg-canvas" width="100%" height="100%">
+          <defs>
+            <!-- Grid Pattern -->
+            <pattern
+              id="grid"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 40 0 L 0 0 0 40"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.03)"
+                stroke-width="1.5"
+              />
+            </pattern>
+            <!-- Glowing filters for active cells/wires -->
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <!-- Small Glow Filter -->
+            <filter id="glow-sm" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Background Grid -->
+          <rect width="100%" height="100%" fill="url(#grid)" />
+
+          <!-- Visual Elements Groups (Z-ordering) -->
+          <g id="transform-group">
+            <g id="wires-group"></g>
+            <g id="cells-group"></g>
+            <g id="ports-group"></g>
+            <g id="interaction-glows-group"></g>
+            <g id="drag-wire-group"></g>
+          </g>
+        </svg>
+
+        <!-- Interactive Editor Toast Notifications -->
+        <div id="editor-toast" class="toast hidden">Toast message</div>
+
+        <!-- Floating Controls Panel at the bottom -->
+        <div class="controls-panel glass">
+          <div class="control-group">
+            <button
+              id="btn-play-pause"
+              class="control-btn btn-primary"
+              title="Start/Pause auto simulation"
+            >
+              <span class="play-icon">▶</span> Play
+            </button>
+            <button
+              id="btn-step"
+              class="control-btn btn-secondary"
+              title="Execute a single reduction step"
+            >
+              Step
+            </button>
+            <button
+              id="btn-reset"
+              class="control-btn btn-secondary"
+              title="Reset to current preset's initial state"
+            >
+              Reset
+            </button>
+            <button
+              id="btn-clear"
+              class="control-btn btn-danger"
+              title="Clear all nodes and wires"
+            >
+              Clear Canvas
+            </button>
+          </div>
+
+          <div class="control-divider"></div>
+
+          <div class="control-group flex-col">
+            <div class="speed-label">
+              <span>Simulation Speed</span>
+              <span id="speed-val">2 steps/s</span>
+            </div>
+            <input
+              type="range"
+              id="speed-slider"
+              min="0.5"
+              max="15"
+              step="0.5"
+              value="2"
+              class="speed-slider"
+            />
+          </div>
+
+          <div class="control-divider"></div>
+
+          <div class="control-group">
+            <button
+              id="btn-toggle-physics"
+              class="control-btn toggle-btn active"
+              title="Toggle force-directed physics layout"
+            >
+              Physics Layout
+            </button>
+            <button
+              id="btn-auto-center"
+              class="control-btn btn-secondary"
+              title="Zoom and center all elements"
+            >
+              Center
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Script loading indices -->
+    
+  <script type="module">// site/interaction-nets-playground-v2/index.tsx
+var SYSTEMS = {
+  combinators: {
+    name: "Interaction Combinators",
+    description: "Yves Lafont's universal model of distributed computation. It consists of two duplicators (γ, δ) and an eraser (ε). Dual constructors annihilate, different constructors commute (duplicate and cross-connect).",
+    symbols: {
+      gamma: {
+        name: "γ (Gamma)",
+        labelChar: "γ",
+        arity: 2,
+        color: "#10b981",
+        description: "Primary constructor / Duplicator node."
+      },
+      delta: {
+        name: "δ (Delta)",
+        labelChar: "δ",
+        arity: 2,
+        color: "#f59e0b",
+        description: "Secondary constructor / Duplicator node."
+      },
+      epsilon: {
+        name: "ε (Eraser)",
+        labelChar: "ε",
+        arity: 0,
+        color: "#ef4444",
+        description: "Eraser node that garbage-collects other cells."
+      }
+    },
+    presets: [
+      {
+        name: "Annihilation Demo (γ × γ)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 150,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "g2",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 350,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "f1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 80,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 80,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f3",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 420,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f4",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 420,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "g2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a1",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "f1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a2",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "f2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a3",
+                fromNodeId: "g2",
+                fromPortIndex: 1,
+                toNodeId: "f3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a4",
+                fromNodeId: "g2",
+                fromPortIndex: 2,
+                toNodeId: "f4",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Commutation Demo (γ × δ)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 160,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "d1",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "f1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 80,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 80,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f3",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 420,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f4",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 420,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "d1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a1",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "f1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a2",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "f2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a3",
+                fromNodeId: "d1",
+                fromPortIndex: 1,
+                toNodeId: "f3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a4",
+                fromNodeId: "d1",
+                fromPortIndex: 2,
+                toNodeId: "f4",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Eraser Commutation (γ × ε)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 160,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "e1",
+                type: "cell",
+                symbol: "epsilon",
+                x: 250,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "f1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 80,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 80,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "e1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a1",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "f1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_a2",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "f2",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Self-Replication Loop",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 200,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: 0
+              },
+              {
+                id: "d1",
+                type: "cell",
+                symbol: "delta",
+                x: 300,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI
+              },
+              {
+                id: "f1",
+                type: "free",
+                symbol: "Free",
+                x: 120,
+                y: 120,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f2",
+                type: "free",
+                symbol: "Free",
+                x: 120,
+                y: 380,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f3",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 120,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "f4",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 380,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "d1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g1",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "f1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g2",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "f2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d1",
+                fromNodeId: "d1",
+                fromPortIndex: 1,
+                toNodeId: "f3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d2",
+                fromNodeId: "d1",
+                fromPortIndex: 2,
+                toNodeId: "f4",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Commutation Cascade (3γ × 3δ)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "g1",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 210,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "g2",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 140,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "g3",
+                type: "cell",
+                symbol: "gamma",
+                x: 250,
+                y: 70,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "d1",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 290,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "d2",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 360,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "d3",
+                type: "cell",
+                symbol: "delta",
+                x: 250,
+                y: 430,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "fg1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 40,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fg2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 40,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fg3",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 140,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fg4",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 210,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fd1",
+                type: "free",
+                symbol: "Free",
+                x: 150,
+                y: 460,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fd2",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 460,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fd3",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 360,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "fd4",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 290,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_p",
+                fromNodeId: "g1",
+                fromPortIndex: 0,
+                toNodeId: "d1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g12",
+                fromNodeId: "g1",
+                fromPortIndex: 1,
+                toNodeId: "g2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g23",
+                fromNodeId: "g2",
+                fromPortIndex: 1,
+                toNodeId: "g3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g3_f1",
+                fromNodeId: "g3",
+                fromPortIndex: 1,
+                toNodeId: "fg1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g3_f2",
+                fromNodeId: "g3",
+                fromPortIndex: 2,
+                toNodeId: "fg2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g2_f",
+                fromNodeId: "g2",
+                fromPortIndex: 2,
+                toNodeId: "fg3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_g1_f",
+                fromNodeId: "g1",
+                fromPortIndex: 2,
+                toNodeId: "fg4",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d12",
+                fromNodeId: "d1",
+                fromPortIndex: 1,
+                toNodeId: "d2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d23",
+                fromNodeId: "d2",
+                fromPortIndex: 1,
+                toNodeId: "d3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d3_f1",
+                fromNodeId: "d3",
+                fromPortIndex: 1,
+                toNodeId: "fd1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d3_f2",
+                fromNodeId: "d3",
+                fromPortIndex: 2,
+                toNodeId: "fd2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d2_f",
+                fromNodeId: "d2",
+                fromPortIndex: 2,
+                toNodeId: "fd3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_d1_f",
+                fromNodeId: "d1",
+                fromPortIndex: 2,
+                toNodeId: "fd4",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      }
+    ]
+  },
+  arithmetic: {
+    name: "Interaction Arithmetic",
+    description: "Implements Peano arithmetic on interaction nets. Successor (S, arity 1) and Zero (Z, arity 0) represent numbers. Addition (Add, arity 2) and Multiplication (Mul, arity 2) reduce recursively. Duplicator (D) and Eraser (E) handle garbage collection and sharing.",
+    symbols: {
+      S: {
+        name: "S (Successor)",
+        labelChar: "S",
+        arity: 1,
+        color: "#3b82f6",
+        description: "Successor node representing (+1)."
+      },
+      Z: {
+        name: "Z (Zero)",
+        labelChar: "0",
+        arity: 0,
+        color: "#64748b",
+        description: "Zero constant node."
+      },
+      Add: {
+        name: "Add (Addition)",
+        labelChar: "+",
+        arity: 2,
+        color: "#8b5cf6",
+        description: "Addition node. Principal port connects to operand 1."
+      },
+      Mul: {
+        name: "Mul (Multiplication)",
+        labelChar: "×",
+        arity: 2,
+        color: "#ec4899",
+        description: "Multiplication node. Principal port connects to multiplier."
+      },
+      D: {
+        name: "D (Duplicator)",
+        labelChar: "D",
+        arity: 2,
+        color: "#10b981",
+        description: "Sharing / Duplication node."
+      },
+      E: {
+        name: "E (Eraser)",
+        labelChar: "E",
+        arity: 0,
+        color: "#ef4444",
+        description: "Garbage collection node."
+      }
+    },
+    presets: [
+      {
+        name: "Addition: 2 + 1 = 3",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "add",
+                type: "cell",
+                symbol: "Add",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 170,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 40,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z3",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 410,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 340,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_add_p",
+                fromNodeId: "add",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s2_z2",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_add_a1",
+                fromNodeId: "add",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s3_z3",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "z3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_add_a2",
+                fromNodeId: "add",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Multiplication: 2 × 2 = 4",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "mul",
+                type: "cell",
+                symbol: "Mul",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 170,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 40,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s4",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 410,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z4",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 480,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 340,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_mul_p",
+                fromNodeId: "mul",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s2_z2",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_mul_a1",
+                fromNodeId: "mul",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s3_s4",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "s4",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s4_z4",
+                fromNodeId: "s4",
+                fromPortIndex: 1,
+                toNodeId: "z4",
+                toPortIndex: 0
+              },
+              {
+                id: "w_mul_a2",
+                fromNodeId: "mul",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Addition: 5 + 5 = 10",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "add",
+                type: "cell",
+                symbol: "Add",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 200,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 170,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 140,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s4",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 110,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s5",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 80,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z1",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 50,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sa",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 300,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sb",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 330,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sc",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 360,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sd",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 390,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "se",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 420,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 450,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 300,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_add_p",
+                fromNodeId: "add",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s2_s3",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s3_s4",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "s4",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s4_s5",
+                fromNodeId: "s4",
+                fromPortIndex: 1,
+                toNodeId: "s5",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s5_z1",
+                fromNodeId: "s5",
+                fromPortIndex: 1,
+                toNodeId: "z1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_add_a1",
+                fromNodeId: "add",
+                fromPortIndex: 1,
+                toNodeId: "sa",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sa_sb",
+                fromNodeId: "sa",
+                fromPortIndex: 1,
+                toNodeId: "sb",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sb_sc",
+                fromNodeId: "sb",
+                fromPortIndex: 1,
+                toNodeId: "sc",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sc_sd",
+                fromNodeId: "sc",
+                fromPortIndex: 1,
+                toNodeId: "sd",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sd_se",
+                fromNodeId: "sd",
+                fromPortIndex: 1,
+                toNodeId: "se",
+                toPortIndex: 0
+              },
+              {
+                id: "w_se_z2",
+                fromNodeId: "se",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_add_a2",
+                fromNodeId: "add",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Multiplication: 3 × 2 = 6",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "mul",
+                type: "cell",
+                symbol: "Mul",
+                x: 250,
+                y: 250,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "s1",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 200,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s2",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 150,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "s3",
+                type: "cell",
+                symbol: "S",
+                x: 250,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z1",
+                type: "cell",
+                symbol: "Z",
+                x: 250,
+                y: 50,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sa",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 300,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "sb",
+                type: "cell",
+                symbol: "S",
+                x: 150,
+                y: 350,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "z2",
+                type: "cell",
+                symbol: "Z",
+                x: 150,
+                y: 400,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 300,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_mul_p",
+                fromNodeId: "mul",
+                fromPortIndex: 0,
+                toNodeId: "s1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s1_s2",
+                fromNodeId: "s1",
+                fromPortIndex: 1,
+                toNodeId: "s2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s2_s3",
+                fromNodeId: "s2",
+                fromPortIndex: 1,
+                toNodeId: "s3",
+                toPortIndex: 0
+              },
+              {
+                id: "w_s3_z1",
+                fromNodeId: "s3",
+                fromPortIndex: 1,
+                toNodeId: "z1",
+                toPortIndex: 0
+              },
+              {
+                id: "w_mul_a1",
+                fromNodeId: "mul",
+                fromPortIndex: 1,
+                toNodeId: "sa",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sa_sb",
+                fromNodeId: "sa",
+                fromPortIndex: 1,
+                toNodeId: "sb",
+                toPortIndex: 0
+              },
+              {
+                id: "w_sb_z2",
+                fromNodeId: "sb",
+                fromPortIndex: 1,
+                toNodeId: "z2",
+                toPortIndex: 0
+              },
+              {
+                id: "w_mul_a2",
+                fromNodeId: "mul",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      }
+    ]
+  },
+  logic: {
+    name: "Boolean Logic Circuits",
+    description: "Evaluates boolean logic circuits in parallel. True and False constants (arity 0) interact with logic gates (Not, And, Or). Wires evaluate to final true/false values.",
+    symbols: {
+      True: {
+        name: "True (Boolean Constant)",
+        labelChar: "T",
+        arity: 0,
+        color: "#10b981",
+        description: "Constant TRUE value."
+      },
+      False: {
+        name: "False (Boolean Constant)",
+        labelChar: "F",
+        arity: 0,
+        color: "#ef4444",
+        description: "Constant FALSE value."
+      },
+      Not: {
+        name: "Not (Inversion)",
+        labelChar: "~",
+        arity: 1,
+        color: "#f59e0b",
+        description: "Logical inversion gate."
+      },
+      And: {
+        name: "And (Conjunction)",
+        labelChar: "&",
+        arity: 2,
+        color: "#3b82f6",
+        description: "Conjunction gate. Port 1 is second input, Port 2 is output."
+      },
+      Or: {
+        name: "Or (Disjunction)",
+        labelChar: "|",
+        arity: 2,
+        color: "#8b5cf6",
+        description: "Disjunction gate. Port 1 is second input, Port 2 is output."
+      },
+      D: {
+        name: "D (Duplicator)",
+        labelChar: "D",
+        arity: 2,
+        color: "#059669",
+        description: "Sharing duplicator node."
+      },
+      E: {
+        name: "E (Eraser)",
+        labelChar: "E",
+        arity: 0,
+        color: "#b91c1c",
+        description: "Boolean eraser."
+      }
+    },
+    presets: [
+      {
+        name: "Evaluation: Not(False) = True",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "not_gate",
+                type: "cell",
+                symbol: "Not",
+                x: 250,
+                y: 220,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "false_val",
+                type: "cell",
+                symbol: "False",
+                x: 250,
+                y: 120,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 250,
+                y: 340,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_not_p",
+                fromNodeId: "not_gate",
+                fromPortIndex: 0,
+                toNodeId: "false_val",
+                toPortIndex: 0
+              },
+              {
+                id: "w_not_a1",
+                fromNodeId: "not_gate",
+                fromPortIndex: 1,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Evaluation: True AND False = False",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "and_gate",
+                type: "cell",
+                symbol: "And",
+                x: 250,
+                y: 220,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "true_val",
+                type: "cell",
+                symbol: "True",
+                x: 200,
+                y: 120,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "false_val",
+                type: "cell",
+                symbol: "False",
+                x: 300,
+                y: 120,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "out",
+                type: "free",
+                symbol: "Free",
+                x: 250,
+                y: 340,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_and_p",
+                fromNodeId: "and_gate",
+                fromPortIndex: 0,
+                toNodeId: "true_val",
+                toPortIndex: 0
+              },
+              {
+                id: "w_and_a1",
+                fromNodeId: "and_gate",
+                fromPortIndex: 1,
+                toNodeId: "false_val",
+                toPortIndex: 0
+              },
+              {
+                id: "w_and_a2",
+                fromNodeId: "and_gate",
+                fromPortIndex: 2,
+                toNodeId: "out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "Full Half Adder (XOR & AND)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "true_a",
+                type: "cell",
+                symbol: "True",
+                x: 150,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "true_b",
+                type: "cell",
+                symbol: "True",
+                x: 350,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "dup_a",
+                type: "cell",
+                symbol: "D",
+                x: 150,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "dup_b",
+                type: "cell",
+                symbol: "D",
+                x: 350,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "or_gate",
+                type: "cell",
+                symbol: "Or",
+                x: 200,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "and_carry",
+                type: "cell",
+                symbol: "And",
+                x: 300,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "dup_carry",
+                type: "cell",
+                symbol: "D",
+                x: 300,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "not_gate",
+                type: "cell",
+                symbol: "Not",
+                x: 250,
+                y: 410,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "and_sum",
+                type: "cell",
+                symbol: "And",
+                x: 200,
+                y: 480,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "sum_out",
+                type: "free",
+                symbol: "Free",
+                x: 200,
+                y: 560,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "carry_out",
+                type: "free",
+                symbol: "Free",
+                x: 380,
+                y: 560,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_a_dup",
+                fromNodeId: "true_a",
+                fromPortIndex: 0,
+                toNodeId: "dup_a",
+                toPortIndex: 0
+              },
+              {
+                id: "w_b_dup",
+                fromNodeId: "true_b",
+                fromPortIndex: 0,
+                toNodeId: "dup_b",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupa_or",
+                fromNodeId: "dup_a",
+                fromPortIndex: 1,
+                toNodeId: "or_gate",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupa_and",
+                fromNodeId: "dup_a",
+                fromPortIndex: 2,
+                toNodeId: "and_carry",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupb_or",
+                fromNodeId: "dup_b",
+                fromPortIndex: 1,
+                toNodeId: "or_gate",
+                toPortIndex: 1
+              },
+              {
+                id: "w_dupb_and",
+                fromNodeId: "dup_b",
+                fromPortIndex: 2,
+                toNodeId: "and_carry",
+                toPortIndex: 1
+              },
+              {
+                id: "w_or_andsum",
+                fromNodeId: "or_gate",
+                fromPortIndex: 2,
+                toNodeId: "and_sum",
+                toPortIndex: 0
+              },
+              {
+                id: "w_andcarry_dupcarry",
+                fromNodeId: "and_carry",
+                fromPortIndex: 2,
+                toNodeId: "dup_carry",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupcarry_carryout",
+                fromNodeId: "dup_carry",
+                fromPortIndex: 1,
+                toNodeId: "carry_out",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupcarry_not",
+                fromNodeId: "dup_carry",
+                fromPortIndex: 2,
+                toNodeId: "not_gate",
+                toPortIndex: 0
+              },
+              {
+                id: "w_not_andsum",
+                fromNodeId: "not_gate",
+                fromPortIndex: 1,
+                toNodeId: "and_sum",
+                toPortIndex: 1
+              },
+              {
+                id: "w_andsum_out",
+                fromNodeId: "and_sum",
+                fromPortIndex: 2,
+                toNodeId: "sum_out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      },
+      {
+        name: "De Morgan's Proof: ~A && ~B = ~(A || B)",
+        setup: () => {
+          return {
+            nodes: [
+              {
+                id: "true_a",
+                type: "cell",
+                symbol: "True",
+                x: 150,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "false_b",
+                type: "cell",
+                symbol: "False",
+                x: 350,
+                y: 100,
+                vx: 0,
+                vy: 0,
+                angle: Math.PI / 2
+              },
+              {
+                id: "dup_a",
+                type: "cell",
+                symbol: "D",
+                x: 150,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "dup_b",
+                type: "cell",
+                symbol: "D",
+                x: 350,
+                y: 180,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "or_lhs",
+                type: "cell",
+                symbol: "Or",
+                x: 200,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "not_lhs",
+                type: "cell",
+                symbol: "Not",
+                x: 200,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "lhs_out",
+                type: "free",
+                symbol: "Free",
+                x: 200,
+                y: 420,
+                vx: 0,
+                vy: 0
+              },
+              {
+                id: "not_a",
+                type: "cell",
+                symbol: "Not",
+                x: 300,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "not_b",
+                type: "cell",
+                symbol: "Not",
+                x: 400,
+                y: 260,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "and_rhs",
+                type: "cell",
+                symbol: "And",
+                x: 350,
+                y: 340,
+                vx: 0,
+                vy: 0,
+                angle: -Math.PI / 2
+              },
+              {
+                id: "rhs_out",
+                type: "free",
+                symbol: "Free",
+                x: 350,
+                y: 420,
+                vx: 0,
+                vy: 0
+              }
+            ],
+            wires: [
+              {
+                id: "w_a_dup",
+                fromNodeId: "true_a",
+                fromPortIndex: 0,
+                toNodeId: "dup_a",
+                toPortIndex: 0
+              },
+              {
+                id: "w_b_dup",
+                fromNodeId: "false_b",
+                fromPortIndex: 0,
+                toNodeId: "dup_b",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupa_or_lhs",
+                fromNodeId: "dup_a",
+                fromPortIndex: 1,
+                toNodeId: "or_lhs",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupb_or_lhs",
+                fromNodeId: "dup_b",
+                fromPortIndex: 1,
+                toNodeId: "or_lhs",
+                toPortIndex: 1
+              },
+              {
+                id: "w_or_not_lhs",
+                fromNodeId: "or_lhs",
+                fromPortIndex: 2,
+                toNodeId: "not_lhs",
+                toPortIndex: 0
+              },
+              {
+                id: "w_not_lhs_out",
+                fromNodeId: "not_lhs",
+                fromPortIndex: 1,
+                toNodeId: "lhs_out",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupa_not_a",
+                fromNodeId: "dup_a",
+                fromPortIndex: 2,
+                toNodeId: "not_a",
+                toPortIndex: 0
+              },
+              {
+                id: "w_dupb_not_b",
+                fromNodeId: "dup_b",
+                fromPortIndex: 2,
+                toNodeId: "not_b",
+                toPortIndex: 0
+              },
+              {
+                id: "w_nota_and_rhs",
+                fromNodeId: "not_a",
+                fromPortIndex: 1,
+                toNodeId: "and_rhs",
+                toPortIndex: 0
+              },
+              {
+                id: "w_notb_and_rhs",
+                fromNodeId: "not_b",
+                fromPortIndex: 1,
+                toNodeId: "and_rhs",
+                toPortIndex: 1
+              },
+              {
+                id: "w_and_rhs_out",
+                fromNodeId: "and_rhs",
+                fromPortIndex: 2,
+                toNodeId: "rhs_out",
+                toPortIndex: 0
+              }
+            ]
+          };
+        }
+      }
+    ]
+  }
+};
+function getDistance(n1, n2) {
+  const dx = n2.x - n1.x;
+  const dy = n2.y - n1.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+function getPortCoordinate(node, portIndex, arity) {
+  if (node.type === "free") {
+    return { x: node.x, y: node.y };
+  }
+  const theta = node.angle ?? -Math.PI / 2;
+  const R_principal = 22;
+  const R_back = 12;
+  const spacing = 16;
+  if (portIndex === 0) {
+    return {
+      x: node.x + R_principal * Math.cos(theta),
+      y: node.y + R_principal * Math.sin(theta)
+    };
+  } else {
+    const bx = node.x - R_back * Math.cos(theta);
+    const by = node.y - R_back * Math.sin(theta);
+    const ux = -Math.sin(theta);
+    const uy = Math.cos(theta);
+    const offset = (portIndex - (arity + 1) / 2) * spacing;
+    return {
+      x: bx + offset * ux,
+      y: by + offset * uy
+    };
+  }
+}
+function getConnectedPort(nodeId, portIndex, wires) {
+  for (const wire of wires) {
+    if (wire.fromNodeId === nodeId && wire.fromPortIndex === portIndex) {
+      return { nodeId: wire.toNodeId, portIndex: wire.toPortIndex };
+    }
+    if (wire.toNodeId === nodeId && wire.toPortIndex === portIndex) {
+      return { nodeId: wire.fromNodeId, portIndex: wire.fromPortIndex };
+    }
+  }
+  return null;
+}
+function rewriteActivePair(nodeAId, nodeBId, nodes, wires, systemKey) {
+  const nodeA = nodes.find((n2) => n2.id === nodeAId);
+  const nodeB = nodes.find((n2) => n2.id === nodeBId);
+  const system = SYSTEMS[systemKey];
+  const symbolA = system.symbols[nodeA.symbol];
+  const symbolB = system.symbols[nodeB.symbol];
+  const n = symbolA.arity;
+  const m = symbolB.arity;
+  const midX = (nodeA.x + nodeB.x) / 2;
+  const midY = (nodeA.y + nodeB.y) / 2;
+  const dest_A = [null];
+  for (let i = 1;i <= n; i++) {
+    dest_A.push(getConnectedPort(nodeA.id, i, wires));
+  }
+  const dest_B = [null];
+  for (let j = 1;j <= m; j++) {
+    dest_B.push(getConnectedPort(nodeB.id, j, wires));
+  }
+  const deletedNodeIds = [nodeA.id, nodeB.id];
+  const deletedWireIds = [];
+  for (const wire of wires) {
+    if (wire.fromNodeId === nodeA.id || wire.toNodeId === nodeA.id || wire.fromNodeId === nodeB.id || wire.toNodeId === nodeB.id) {
+      deletedWireIds.push(wire.id);
+    }
+  }
+  const newNodes = [];
+  const newWires = [];
+  const uniqueId = () => Math.random().toString(36).substring(2, 9);
+  if (systemKey === "arithmetic") {
+    if (nodeA.symbol === "Add" && nodeB.symbol === "Z" || nodeA.symbol === "Z" && nodeB.symbol === "Add") {
+      const d_add = nodeA.symbol === "Add" ? dest_A : dest_B;
+      const targetX = d_add[1];
+      const targetY = d_add[2];
+      if (targetX && targetY) {
+        newWires.push({
+          id: `w_fuse_${uniqueId()}`,
+          fromNodeId: targetX.nodeId,
+          fromPortIndex: targetX.portIndex,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Add" && nodeB.symbol === "S" || nodeA.symbol === "S" && nodeB.symbol === "Add") {
+      const d_add = nodeA.symbol === "Add" ? dest_A : dest_B;
+      const d_s = nodeA.symbol === "S" ? dest_A : dest_B;
+      const targetX = d_add[1];
+      const targetY = d_add[2];
+      const targetU = d_s[1];
+      const newAddId = `add_${uniqueId()}`;
+      const newSId = `s_${uniqueId()}`;
+      newNodes.push({
+        id: newAddId,
+        type: "cell",
+        symbol: "Add",
+        x: midX - 10,
+        y: midY,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2
+      }, {
+        id: newSId,
+        type: "cell",
+        symbol: "S",
+        x: midX + 10,
+        y: midY,
+        vx: 0,
+        vy: 0,
+        angle: Math.PI / 2
+      });
+      if (targetY) {
+        newWires.push({
+          id: `w_s_out_${uniqueId()}`,
+          fromNodeId: newSId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      newWires.push({
+        id: `w_s_add_${uniqueId()}`,
+        fromNodeId: newSId,
+        fromPortIndex: 1,
+        toNodeId: newAddId,
+        toPortIndex: 2
+      });
+      if (targetU) {
+        newWires.push({
+          id: `w_add_u_${uniqueId()}`,
+          fromNodeId: newAddId,
+          fromPortIndex: 0,
+          toNodeId: targetU.nodeId,
+          toPortIndex: targetU.portIndex
+        });
+      }
+      if (targetX) {
+        newWires.push({
+          id: `w_add_x_${uniqueId()}`,
+          fromNodeId: newAddId,
+          fromPortIndex: 1,
+          toNodeId: targetX.nodeId,
+          toPortIndex: targetX.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Mul" && nodeB.symbol === "Z" || nodeA.symbol === "Z" && nodeB.symbol === "Mul") {
+      const d_mul = nodeA.symbol === "Mul" ? dest_A : dest_B;
+      const targetX = d_mul[1];
+      const targetY = d_mul[2];
+      const newEId = `e_${uniqueId()}`;
+      const newZId = `z_${uniqueId()}`;
+      if (targetX) {
+        newNodes.push({
+          id: newEId,
+          type: "cell",
+          symbol: "E",
+          x: midX - 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_e_x_${uniqueId()}`,
+          fromNodeId: newEId,
+          fromPortIndex: 0,
+          toNodeId: targetX.nodeId,
+          toPortIndex: targetX.portIndex
+        });
+      }
+      if (targetY) {
+        newNodes.push({
+          id: newZId,
+          type: "cell",
+          symbol: "Z",
+          x: midX + 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_z_y_${uniqueId()}`,
+          fromNodeId: newZId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Mul" && nodeB.symbol === "S" || nodeA.symbol === "S" && nodeB.symbol === "Mul") {
+      const d_mul = nodeA.symbol === "Mul" ? dest_A : dest_B;
+      const d_s = nodeA.symbol === "S" ? dest_A : dest_B;
+      const targetX = d_mul[1];
+      const targetY = d_mul[2];
+      const targetU = d_s[1];
+      const newDId = `d_${uniqueId()}`;
+      const newMulId = `mul_${uniqueId()}`;
+      const newAddId = `add_${uniqueId()}`;
+      newNodes.push({
+        id: newDId,
+        type: "cell",
+        symbol: "D",
+        x: midX - 30,
+        y: midY,
+        vx: 0,
+        vy: 0,
+        angle: 0
+      }, {
+        id: newMulId,
+        type: "cell",
+        symbol: "Mul",
+        x: midX,
+        y: midY - 20,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2
+      }, {
+        id: newAddId,
+        type: "cell",
+        symbol: "Add",
+        x: midX + 30,
+        y: midY,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2
+      });
+      if (targetX) {
+        newWires.push({
+          id: `w_d_x_${uniqueId()}`,
+          fromNodeId: newDId,
+          fromPortIndex: 0,
+          toNodeId: targetX.nodeId,
+          toPortIndex: targetX.portIndex
+        });
+      }
+      if (targetU) {
+        newWires.push({
+          id: `w_mul_u_${uniqueId()}`,
+          fromNodeId: newMulId,
+          fromPortIndex: 0,
+          toNodeId: targetU.nodeId,
+          toPortIndex: targetU.portIndex
+        });
+      }
+      newWires.push({
+        id: `w_mul_d1_${uniqueId()}`,
+        fromNodeId: newMulId,
+        fromPortIndex: 1,
+        toNodeId: newDId,
+        toPortIndex: 1
+      });
+      newWires.push({
+        id: `w_add_mul_${uniqueId()}`,
+        fromNodeId: newAddId,
+        fromPortIndex: 0,
+        toNodeId: newMulId,
+        toPortIndex: 2
+      });
+      newWires.push({
+        id: `w_add_d2_${uniqueId()}`,
+        fromNodeId: newAddId,
+        fromPortIndex: 1,
+        toNodeId: newDId,
+        toPortIndex: 2
+      });
+      if (targetY) {
+        newWires.push({
+          id: `w_add_y_${uniqueId()}`,
+          fromNodeId: newAddId,
+          fromPortIndex: 2,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+  } else if (systemKey === "logic") {
+    if (nodeA.symbol === "Not" && nodeB.symbol === "True" || nodeA.symbol === "True" && nodeB.symbol === "Not") {
+      const d_not = nodeA.symbol === "Not" ? dest_A : dest_B;
+      const targetY = d_not[1];
+      const newFId = `false_${uniqueId()}`;
+      if (targetY) {
+        newNodes.push({
+          id: newFId,
+          type: "cell",
+          symbol: "False",
+          x: midX,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_f_y_${uniqueId()}`,
+          fromNodeId: newFId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Not" && nodeB.symbol === "False" || nodeA.symbol === "False" && nodeB.symbol === "Not") {
+      const d_not = nodeA.symbol === "Not" ? dest_A : dest_B;
+      const targetY = d_not[1];
+      const newTId = `true_${uniqueId()}`;
+      if (targetY) {
+        newNodes.push({
+          id: newTId,
+          type: "cell",
+          symbol: "True",
+          x: midX,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_t_y_${uniqueId()}`,
+          fromNodeId: newTId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "And" && nodeB.symbol === "True" || nodeA.symbol === "True" && nodeB.symbol === "And") {
+      const d_and = nodeA.symbol === "And" ? dest_A : dest_B;
+      const targetX = d_and[1];
+      const targetY = d_and[2];
+      if (targetX && targetY) {
+        newWires.push({
+          id: `w_and_fuse_${uniqueId()}`,
+          fromNodeId: targetX.nodeId,
+          fromPortIndex: targetX.portIndex,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "And" && nodeB.symbol === "False" || nodeA.symbol === "False" && nodeB.symbol === "And") {
+      const d_and = nodeA.symbol === "And" ? dest_A : dest_B;
+      const targetX = d_and[1];
+      const targetY = d_and[2];
+      const newEId = `e_${uniqueId()}`;
+      const newFId = `f_${uniqueId()}`;
+      if (targetX) {
+        newNodes.push({
+          id: newEId,
+          type: "cell",
+          symbol: "E",
+          x: midX - 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_e_x_${uniqueId()}`,
+          fromNodeId: newEId,
+          fromPortIndex: 0,
+          toNodeId: targetX.nodeId,
+          toPortIndex: targetX.portIndex
+        });
+      }
+      if (targetY) {
+        newNodes.push({
+          id: newFId,
+          type: "cell",
+          symbol: "False",
+          x: midX + 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_f_y_${uniqueId()}`,
+          fromNodeId: newFId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Or" && nodeB.symbol === "True" || nodeA.symbol === "True" && nodeB.symbol === "Or") {
+      const d_or = nodeA.symbol === "Or" ? dest_A : dest_B;
+      const targetX = d_or[1];
+      const targetY = d_or[2];
+      const newEId = `e_${uniqueId()}`;
+      const newTId = `t_${uniqueId()}`;
+      if (targetX) {
+        newNodes.push({
+          id: newEId,
+          type: "cell",
+          symbol: "E",
+          x: midX - 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_e_x_${uniqueId()}`,
+          fromNodeId: newEId,
+          fromPortIndex: 0,
+          toNodeId: targetX.nodeId,
+          toPortIndex: targetX.portIndex
+        });
+      }
+      if (targetY) {
+        newNodes.push({
+          id: newTId,
+          type: "cell",
+          symbol: "True",
+          x: midX + 15,
+          y: midY,
+          vx: 0,
+          vy: 0,
+          angle: 0
+        });
+        newWires.push({
+          id: `w_t_y_${uniqueId()}`,
+          fromNodeId: newTId,
+          fromPortIndex: 0,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+    if (nodeA.symbol === "Or" && nodeB.symbol === "False" || nodeA.symbol === "False" && nodeB.symbol === "Or") {
+      const d_or = nodeA.symbol === "Or" ? dest_A : dest_B;
+      const targetX = d_or[1];
+      const targetY = d_or[2];
+      if (targetX && targetY) {
+        newWires.push({
+          id: `w_or_fuse_${uniqueId()}`,
+          fromNodeId: targetX.nodeId,
+          fromPortIndex: targetX.portIndex,
+          toNodeId: targetY.nodeId,
+          toPortIndex: targetY.portIndex
+        });
+      }
+      return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+    }
+  }
+  if (nodeA.symbol === nodeB.symbol) {
+    const adj = new Map;
+    const addEdge = (u, v) => {
+      if (!adj.has(u))
+        adj.set(u, []);
+      if (!adj.has(v))
+        adj.set(v, []);
+      adj.get(u).push(v);
+      adj.get(v).push(u);
+    };
+    const portKey = (nodeId, idx) => `${nodeId}:${idx}`;
+    for (const wire of wires) {
+      const k1 = portKey(wire.fromNodeId, wire.fromPortIndex);
+      const k2 = portKey(wire.toNodeId, wire.toPortIndex);
+      const isPrincipalA = wire.fromNodeId === nodeA.id && wire.fromPortIndex === 0 || wire.toNodeId === nodeA.id && wire.toPortIndex === 0;
+      const isPrincipalB = wire.fromNodeId === nodeB.id && wire.fromPortIndex === 0 || wire.toNodeId === nodeB.id && wire.toPortIndex === 0;
+      if (isPrincipalA && isPrincipalB) {
+        continue;
+      }
+      addEdge(k1, k2);
+    }
+    for (let i = 1;i <= n; i++) {
+      const kA = portKey(nodeA.id, i);
+      const kB = portKey(nodeB.id, i);
+      addEdge(kA, kB);
+    }
+    const visited = new Set;
+    const externalConnections = [];
+    const isExternal = (key) => {
+      const parts = key.split(":");
+      const nid = parts[0];
+      return nid !== nodeA.id && nid !== nodeB.id;
+    };
+    for (const start of adj.keys()) {
+      if (!visited.has(start) && isExternal(start)) {
+        const path = [];
+        const queue = [start];
+        visited.add(start);
+        let current;
+        while ((current = queue.shift()) !== undefined) {
+          path.push(current);
+          const neighbors = adj.get(current) || [];
+          for (const next of neighbors) {
+            if (!visited.has(next)) {
+              visited.add(next);
+              queue.push(next);
+            }
+          }
+        }
+        const end = path[path.length - 1];
+        if (start !== end && isExternal(end)) {
+          externalConnections.push([start, end]);
+        }
+      }
+    }
+    for (const [p1, p2] of externalConnections) {
+      const parts1 = p1.split(":");
+      const parts2 = p2.split(":");
+      newWires.push({
+        id: `w_fuse_${uniqueId()}`,
+        fromNodeId: parts1[0],
+        fromPortIndex: parseInt(parts1[1], 10),
+        toNodeId: parts2[0],
+        toPortIndex: parseInt(parts2[1], 10)
+      });
+    }
+  } else {
+    const newCellsA = [];
+    for (let j = 1;j <= m; j++) {
+      const cid = `${nodeA.symbol}_new_${uniqueId()}`;
+      newCellsA.push({
+        id: cid,
+        type: "cell",
+        symbol: nodeA.symbol,
+        x: midX + 35 * Math.cos(nodeB.angle || 0) + (j - (m + 1) / 2) * 15,
+        y: midY + 35 * Math.sin(nodeB.angle || 0) + (j - (m + 1) / 2) * 15,
+        vx: 0,
+        vy: 0,
+        angle: (nodeB.angle || 0) + Math.PI
+      });
+    }
+    const newCellsB = [];
+    for (let i = 1;i <= n; i++) {
+      const cid = `${nodeB.symbol}_new_${uniqueId()}`;
+      newCellsB.push({
+        id: cid,
+        type: "cell",
+        symbol: nodeB.symbol,
+        x: midX + 35 * Math.cos(nodeA.angle || 0) + (i - (n + 1) / 2) * 15,
+        y: midY + 35 * Math.sin(nodeA.angle || 0) + (i - (n + 1) / 2) * 15,
+        vx: 0,
+        vy: 0,
+        angle: (nodeA.angle || 0) + Math.PI
+      });
+    }
+    newNodes.push(...newCellsA, ...newCellsB);
+    for (let j = 1;j <= m; j++) {
+      const cellA_j = newCellsA[j - 1];
+      const target = dest_B[j];
+      if (target) {
+        if (target.nodeId === nodeA.id) {
+          const idx = target.portIndex;
+          const cellB_idx = newCellsB[idx - 1];
+          newWires.push({
+            id: `w_comm_self_${uniqueId()}`,
+            fromNodeId: cellA_j.id,
+            fromPortIndex: 0,
+            toNodeId: cellB_idx.id,
+            toPortIndex: 0
+          });
+        } else {
+          newWires.push({
+            id: `w_comm_a_${uniqueId()}`,
+            fromNodeId: cellA_j.id,
+            fromPortIndex: 0,
+            toNodeId: target.nodeId,
+            toPortIndex: target.portIndex
+          });
+        }
+      }
+    }
+    for (let i = 1;i <= n; i++) {
+      const cellB_i = newCellsB[i - 1];
+      const target = dest_A[i];
+      if (target) {
+        if (target.nodeId === nodeB.id) {
+          continue;
+        } else {
+          newWires.push({
+            id: `w_comm_b_${uniqueId()}`,
+            fromNodeId: cellB_i.id,
+            fromPortIndex: 0,
+            toNodeId: target.nodeId,
+            toPortIndex: target.portIndex
+          });
+        }
+      }
+    }
+    for (let i = 1;i <= n; i++) {
+      const cellB_i = newCellsB[i - 1];
+      for (let j = 1;j <= m; j++) {
+        const cellA_j = newCellsA[j - 1];
+        newWires.push({
+          id: `w_comm_cross_${uniqueId()}`,
+          fromNodeId: cellA_j.id,
+          fromPortIndex: i,
+          toNodeId: cellB_i.id,
+          toPortIndex: j
+        });
+      }
+    }
+  }
+  return { newNodes, newWires, deletedNodeIds, deletedWireIds };
+}
+
+class InteractionPlayground {
+  container;
+  svg;
+  transformGroup;
+  wiresGroup;
+  cellsGroup;
+  portsGroup;
+  interactionGlowsGroup;
+  dragWireGroup;
+  nodes = [];
+  wires = [];
+  systemKey = "combinators";
+  editorMode = "select";
+  selectedSymbol = "gamma";
+  isPanning = false;
+  panX = 0;
+  panY = 0;
+  zoom = 1;
+  hasManuallyPannedOrZoomed = false;
+  startDragX = 0;
+  startDragY = 0;
+  activeDragNode = null;
+  activeWireSource = null;
+  currentMousePos = { x: 0, y: 0 };
+  isRunning = false;
+  lastStepTime = 0;
+  simSpeed = 2;
+  stepCount = 0;
+  initialPresetState = null;
+  animations = [];
+  runPhysics = true;
+  constructor() {
+    this.container = document.querySelector(".app-container");
+    this.svg = document.getElementById("svg-viewport");
+    this.transformGroup = document.getElementById("transform-group");
+    this.wiresGroup = document.getElementById("wires-group");
+    this.cellsGroup = document.getElementById("cells-group");
+    this.portsGroup = document.getElementById("ports-group");
+    this.interactionGlowsGroup = document.getElementById("interaction-glows-group");
+    this.dragWireGroup = document.getElementById("drag-wire-group");
+    this.initEvents();
+    this.changeSystem("combinators");
+    this.startLoop();
+  }
+  initEvents() {
+    const systemSelect = document.getElementById("system-select");
+    systemSelect.addEventListener("change", (e) => {
+      this.changeSystem(e.target.value);
+    });
+    const btnLoadPreset = document.getElementById("btn-load-preset");
+    btnLoadPreset.addEventListener("click", () => {
+      const presetSelect = document.getElementById("preset-select");
+      this.loadPreset(presetSelect.value);
+    });
+    const modes = ["select", "add-cell", "add-wire", "add-free", "delete"];
+    modes.forEach((mode) => {
+      const btn = document.getElementById(`btn-mode-${mode}`);
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tool-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.setEditorMode(mode);
+      });
+    });
+    const btnPlayPause = document.getElementById("btn-play-pause");
+    btnPlayPause.addEventListener("click", () => {
+      this.toggleSim();
+    });
+    const btnStep = document.getElementById("btn-step");
+    btnStep.addEventListener("click", () => {
+      this.simStep();
+    });
+    const btnReset = document.getElementById("btn-reset");
+    btnReset.addEventListener("click", () => {
+      this.resetNet();
+    });
+    const btnClear = document.getElementById("btn-clear");
+    btnClear.addEventListener("click", () => {
+      this.clearNet();
+    });
+    const btnPhysics = document.getElementById("btn-toggle-physics");
+    btnPhysics.addEventListener("click", () => {
+      this.runPhysics = !this.runPhysics;
+      btnPhysics.classList.toggle("active", this.runPhysics);
+      this.showToast(this.runPhysics ? "Physics auto-layout enabled" : "Physics auto-layout paused");
+    });
+    const btnCenter = document.getElementById("btn-auto-center");
+    btnCenter.addEventListener("click", () => {
+      this.hasManuallyPannedOrZoomed = false;
+      this.centerNet();
+    });
+    const speedSlider = document.getElementById("speed-slider");
+    const speedVal = document.getElementById("speed-val");
+    speedSlider.addEventListener("input", (e) => {
+      this.simSpeed = parseFloat(e.target.value);
+      speedVal.innerText = `${this.simSpeed} steps/s`;
+    });
+    this.svg.addEventListener("mousedown", (e) => this.onSvgMouseDown(e));
+    this.svg.addEventListener("mousemove", (e) => this.onSvgMouseMove(e));
+    this.svg.addEventListener("mouseup", () => this.onSvgMouseUp());
+    this.svg.addEventListener("wheel", (e) => this.onSvgWheel(e));
+    window.addEventListener("resize", () => {
+      if (!this.hasManuallyPannedOrZoomed) {
+        this.centerNet();
+      }
+    });
+  }
+  changeSystem(systemKey) {
+    this.systemKey = systemKey;
+    const system = SYSTEMS[systemKey];
+    const title = document.getElementById("system-info-title");
+    const desc = document.getElementById("system-info-desc");
+    title.innerText = system.name;
+    desc.innerText = system.description;
+    const presetSelect = document.getElementById("preset-select");
+    presetSelect.innerHTML = "";
+    system.presets.forEach((preset, index) => {
+      const opt = document.createElement("option");
+      opt.value = index.toString();
+      opt.innerText = preset.name;
+      presetSelect.appendChild(opt);
+    });
+    const cellLib = document.getElementById("cell-library");
+    cellLib.innerHTML = "";
+    const symbolKeys = Object.keys(system.symbols);
+    this.selectedSymbol = symbolKeys[0] || "gamma";
+    symbolKeys.forEach((key) => {
+      const sym = system.symbols[key];
+      const card = document.createElement("div");
+      card.className = `lib-card ${key === this.selectedSymbol ? "active" : ""}`;
+      card.dataset.symbol = key;
+      const pathMarkup = sym.arity > 0 ? `<polygon points="16,3 30,28 2,28" fill="${sym.color}18" stroke="${sym.color}" stroke-width="2" />` : `<circle cx="16" cy="16" r="12" fill="${sym.color}18" stroke="${sym.color}" stroke-width="2" />`;
+      card.innerHTML = `
+        <svg class="lib-svg" viewBox="0 0 32 32">
+          ${pathMarkup}
+          <text x="16" y="16" class="cell-label-text" style="font-size:10px">${sym.labelChar}</text>
+        </svg>
+        <span class="lib-name">${sym.labelChar}</span>
+        <span class="lib-arity">Arity ${sym.arity}</span>
+      `;
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".lib-card").forEach((c) => bRemoveActive(c));
+        card.classList.add("active");
+        this.selectedSymbol = key;
+        this.setEditorMode("add-cell");
+        const btnAddCell = document.getElementById("btn-mode-add-cell");
+        document.querySelectorAll(".tool-btn").forEach((b) => b.classList.remove("active"));
+        btnAddCell.classList.add("active");
+      });
+      cellLib.appendChild(card);
+    });
+    function bRemoveActive(c) {
+      c.classList.remove("active");
+    }
+    if (system.presets.length > 0) {
+      this.loadPreset("0");
+    } else {
+      this.clearNet();
+    }
+  }
+  loadPreset(indexStr) {
+    const system = SYSTEMS[this.systemKey];
+    const idx = parseInt(indexStr, 10);
+    const preset = system.presets[idx];
+    if (preset) {
+      const state = preset.setup();
+      this.nodes = JSON.parse(JSON.stringify(state.nodes));
+      this.wires = JSON.parse(JSON.stringify(state.wires));
+      this.initialPresetState = JSON.parse(JSON.stringify(state));
+      this.stepCount = 0;
+      this.isRunning = false;
+      this.updatePlayBtnText();
+      this.centerNet();
+      this.showToast(`Loaded preset: ${preset.name}`);
+    }
+  }
+  setEditorMode(mode) {
+    this.editorMode = mode;
+    this.activeWireSource = null;
+    this.drawDragWire();
+  }
+  showToast(msg) {
+    const toast = document.getElementById("editor-toast");
+    toast.innerText = msg;
+    toast.classList.remove("hidden");
+    setTimeout(() => {
+      toast.classList.add("hidden");
+    }, 2500);
+  }
+  clearNet() {
+    this.nodes = [];
+    this.wires = [];
+    this.stepCount = 0;
+    this.isRunning = false;
+    this.updatePlayBtnText();
+    this.animations = [];
+    this.showToast("Canvas cleared");
+  }
+  resetNet() {
+    if (this.initialPresetState) {
+      this.nodes = JSON.parse(JSON.stringify(this.initialPresetState.nodes));
+      this.wires = JSON.parse(JSON.stringify(this.initialPresetState.wires));
+      this.stepCount = 0;
+      this.isRunning = false;
+      this.updatePlayBtnText();
+      this.animations = [];
+      this.showToast("Net reset to initial state");
+    } else {
+      this.clearNet();
+    }
+  }
+  toggleSim() {
+    this.isRunning = !this.isRunning;
+    this.updatePlayBtnText();
+    if (this.isRunning) {
+      this.lastStepTime = performance.now();
+      this.showToast("Simulation running");
+    } else {
+      this.showToast("Simulation paused");
+    }
+  }
+  updatePlayBtnText() {
+    const btn = document.getElementById("btn-play-pause");
+    if (this.isRunning) {
+      btn.innerHTML = `<span class="play-icon">❚❚</span> Pause`;
+      btn.classList.add("btn-danger");
+    } else {
+      btn.innerHTML = `<span class="play-icon">▶</span> Play`;
+      btn.classList.remove("btn-danger");
+    }
+  }
+  getCanvasCoords(e) {
+    const rect = this.svg.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    return {
+      x: (mx - this.panX) / this.zoom,
+      y: (my - this.panY) / this.zoom
+    };
+  }
+  onSvgMouseDown(e) {
+    const target = e.target;
+    const coords = this.getCanvasCoords(e);
+    this.currentMousePos = coords;
+    const nodeIdAttr = target.getAttribute("data-node-id");
+    const portIdxAttr = target.getAttribute("data-port-index");
+    if (nodeIdAttr) {
+      const clickedNode = this.nodes.find((n) => n.id === nodeIdAttr);
+      if (this.editorMode === "delete") {
+        this.nodes = this.nodes.filter((n) => n.id !== nodeIdAttr);
+        this.wires = this.wires.filter((w) => w.fromNodeId !== nodeIdAttr && w.toNodeId !== nodeIdAttr);
+        return;
+      }
+      if (this.editorMode === "select" && clickedNode) {
+        this.activeDragNode = clickedNode;
+        clickedNode.isDragging = true;
+        return;
+      }
+    }
+    if (portIdxAttr) {
+      const portNodeId = target.getAttribute("data-port-node-id");
+      const portIdx = parseInt(portIdxAttr, 10);
+      if (this.editorMode === "add-wire") {
+        const conn = getConnectedPort(portNodeId, portIdx, this.wires);
+        if (conn) {
+          this.wires = this.wires.filter((w) => !(w.fromNodeId === portNodeId && w.fromPortIndex === portIdx || w.toNodeId === portNodeId && w.toPortIndex === portIdx));
+        }
+        this.activeWireSource = { nodeId: portNodeId, portIndex: portIdx };
+        return;
+      }
+    }
+    const wireIdAttr = target.getAttribute("data-wire-id");
+    if (wireIdAttr && this.editorMode === "delete") {
+      this.wires = this.wires.filter((w) => w.id !== wireIdAttr);
+      return;
+    }
+    if (this.editorMode === "add-cell") {
+      const cellId = `cell_${Math.random().toString(36).substring(2, 9)}`;
+      this.nodes.push({
+        id: cellId,
+        type: "cell",
+        symbol: this.selectedSymbol,
+        x: coords.x,
+        y: coords.y,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2
+      });
+      return;
+    }
+    if (this.editorMode === "add-free") {
+      const freeId = `free_${Math.random().toString(36).substring(2, 9)}`;
+      this.nodes.push({
+        id: freeId,
+        type: "free",
+        symbol: "Free",
+        x: coords.x,
+        y: coords.y,
+        vx: 0,
+        vy: 0
+      });
+      return;
+    }
+    if (this.editorMode === "select" && !this.activeDragNode) {
+      this.isPanning = true;
+      this.startDragX = e.clientX - this.panX;
+      this.startDragY = e.clientY - this.panY;
+    }
+  }
+  onSvgMouseMove(e) {
+    const coords = this.getCanvasCoords(e);
+    this.currentMousePos = coords;
+    if (this.activeDragNode) {
+      this.activeDragNode.x = coords.x;
+      this.activeDragNode.y = coords.y;
+      this.activeDragNode.vx = 0;
+      this.activeDragNode.vy = 0;
+    } else if (this.activeWireSource) {
+      this.drawDragWire();
+    } else if (this.isPanning) {
+      this.panX = e.clientX - this.startDragX;
+      this.panY = e.clientY - this.startDragY;
+      this.hasManuallyPannedOrZoomed = true;
+      this.updateViewportTransform();
+    }
+  }
+  onSvgMouseUp() {
+    if (this.activeDragNode) {
+      this.activeDragNode.isDragging = false;
+      this.activeDragNode = null;
+    }
+    if (this.activeWireSource) {
+      const targetElement = document.elementFromPoint(this.currentMousePos.x * this.zoom + this.panX + this.svg.getBoundingClientRect().left, this.currentMousePos.y * this.zoom + this.panY + this.svg.getBoundingClientRect().top);
+      const targetPortIdxAttr = targetElement?.getAttribute("data-port-index");
+      const targetPortNodeIdAttr = targetElement?.getAttribute("data-port-node-id");
+      if (targetPortIdxAttr && targetPortNodeIdAttr) {
+        const targetPortIdx = parseInt(targetPortIdxAttr, 10);
+        const sourcePort = this.activeWireSource;
+        if (sourcePort.nodeId !== targetPortNodeIdAttr || sourcePort.portIndex !== targetPortIdx) {
+          const existingConn = getConnectedPort(targetPortNodeIdAttr, targetPortIdx, this.wires);
+          if (!existingConn) {
+            this.wires.push({
+              id: `w_${Math.random().toString(36).substring(2, 9)}`,
+              fromNodeId: sourcePort.nodeId,
+              fromPortIndex: sourcePort.portIndex,
+              toNodeId: targetPortNodeIdAttr,
+              toPortIndex: targetPortIdx
+            });
+            this.showToast("Wire connected!");
+          } else {
+            this.showToast("Target port is already connected");
+          }
+        }
+      }
+      this.activeWireSource = null;
+      this.drawDragWire();
+    }
+    this.isPanning = false;
+  }
+  onSvgWheel(e) {
+    e.preventDefault();
+    const zoomFactor = 1.1;
+    const rect = this.svg.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const cx = (mx - this.panX) / this.zoom;
+    const cy = (my - this.panY) / this.zoom;
+    if (e.deltaY < 0) {
+      this.zoom *= zoomFactor;
+    } else {
+      this.zoom /= zoomFactor;
+    }
+    this.zoom = Math.max(0.15, Math.min(this.zoom, 8));
+    this.panX = mx - cx * this.zoom;
+    this.panY = my - cy * this.zoom;
+    this.hasManuallyPannedOrZoomed = true;
+    this.updateViewportTransform();
+  }
+  updateViewportTransform() {
+    if (isNaN(this.panX) || isNaN(this.panY) || isNaN(this.zoom)) {
+      this.panX = 0;
+      this.panY = 0;
+      this.zoom = 1;
+    }
+    this.transformGroup.setAttribute("transform", `translate(${this.panX}, ${this.panY}) scale(${this.zoom})`);
+  }
+  drawDragWire() {
+    this.dragWireGroup.innerHTML = "";
+    if (this.activeWireSource) {
+      const sourceNode = this.nodes.find((n) => n.id === this.activeWireSource.nodeId);
+      const system = SYSTEMS[this.systemKey];
+      const sym = system.symbols[sourceNode.symbol];
+      const arity = sym?.arity ?? 0;
+      const pCoord = getPortCoordinate(sourceNode, this.activeWireSource.portIndex, arity);
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("class", "drag-wire-temp");
+      path.setAttribute("d", `M ${pCoord.x} ${pCoord.y} L ${this.currentMousePos.x} ${this.currentMousePos.y}`);
+      this.dragWireGroup.appendChild(path);
+    }
+  }
+  simStep() {
+    if (this.animations.length > 0) {
+      this.animations = [];
+    }
+    const activeWire = this.wires.find((w) => {
+      if (w.fromPortIndex === 0 && w.toPortIndex === 0) {
+        const nodeA2 = this.nodes.find((n) => n.id === w.fromNodeId);
+        const nodeB2 = this.nodes.find((n) => n.id === w.toNodeId);
+        return nodeA2?.type === "cell" && nodeB2?.type === "cell";
+      }
+      return false;
+    });
+    if (!activeWire) {
+      this.isRunning = false;
+      this.updatePlayBtnText();
+      this.showToast("Net is normalized!");
+      return;
+    }
+    const nodeA = this.nodes.find((n) => n.id === activeWire.fromNodeId);
+    const nodeB = this.nodes.find((n) => n.id === activeWire.toNodeId);
+    const midX = (nodeA.x + nodeB.x) / 2;
+    const midY = (nodeA.y + nodeB.y) / 2;
+    const system = SYSTEMS[this.systemKey];
+    const symA = system.symbols[nodeA.symbol];
+    const symB = system.symbols[nodeB.symbol];
+    const animId = `anim_${Math.random().toString(36).substring(2, 9)}`;
+    const newAnim = {
+      id: animId,
+      startTime: performance.now(),
+      duration: 600,
+      nodeA: {
+        x: nodeA.x,
+        y: nodeA.y,
+        symbol: nodeA.symbol,
+        color: symA.color,
+        arity: symA.arity,
+        angle: nodeA.angle || 0
+      },
+      nodeB: {
+        x: nodeB.x,
+        y: nodeB.y,
+        symbol: nodeB.symbol,
+        color: symB.color,
+        arity: symB.arity,
+        angle: nodeB.angle || 0
+      },
+      midX,
+      midY,
+      phase: "merge"
+    };
+    this.animations.push(newAnim);
+    nodeA.animating = true;
+    nodeB.animating = true;
+    const { newNodes, newWires, deletedNodeIds, deletedWireIds } = rewriteActivePair(nodeA.id, nodeB.id, this.nodes, this.wires, this.systemKey);
+    this.nodes = this.nodes.filter((n) => !deletedNodeIds.includes(n.id));
+    this.wires = this.wires.filter((w) => !deletedWireIds.includes(w.id));
+    newNodes.forEach((node) => {
+      node.animating = true;
+      this.nodes.push(node);
+    });
+    newWires.forEach((wire) => {
+      this.wires.push(wire);
+    });
+    this.stepCount++;
+    this.burstParticles(midX, midY, symA.color, symB.color);
+  }
+  burstParticles(x, y, color1, color2) {
+    const particleCount = 20;
+    for (let i = 0;i < particleCount; i++) {
+      const particle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      particle.setAttribute("cx", x.toString());
+      particle.setAttribute("cy", y.toString());
+      particle.setAttribute("r", (Math.random() * 4 + 2).toString());
+      particle.setAttribute("fill", i % 2 === 0 ? color1 : color2);
+      particle.setAttribute("class", "particle");
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 80 + 40;
+      const dx = Math.cos(angle) * velocity;
+      const dy = Math.sin(angle) * velocity;
+      particle.style.setProperty("--dx", `${dx}px`);
+      particle.style.setProperty("--dy", `${dy}px`);
+      this.interactionGlowsGroup.appendChild(particle);
+      setTimeout(() => particle.remove(), 500);
+    }
+  }
+  applyPhysics() {
+    if (!this.runPhysics)
+      return;
+    const repulsion_k = 6500;
+    const spring_k = 0.085;
+    const rest_length = 45;
+    const gravity = 0.01;
+    for (let i = 0;i < this.nodes.length; i++) {
+      const n1 = this.nodes[i];
+      if (n1.isDragging || n1.animating)
+        continue;
+      for (let j = i + 1;j < this.nodes.length; j++) {
+        const n2 = this.nodes[j];
+        const dist = getDistance(n1, n2) || 1;
+        if (dist < 180) {
+          const force = repulsion_k / (dist * dist);
+          const dx = (n1.x - n2.x) / dist;
+          const dy = (n1.y - n2.y) / dist;
+          n1.vx += dx * force;
+          n1.vy += dy * force;
+          if (!n2.isDragging && !n2.animating) {
+            n2.vx -= dx * force;
+            n2.vy -= dy * force;
+          }
+        }
+      }
+    }
+    for (const wire of this.wires) {
+      const n1 = this.nodes.find((n) => n.id === wire.fromNodeId);
+      const n2 = this.nodes.find((n) => n.id === wire.toNodeId);
+      if (n1 && n2) {
+        const dist = getDistance(n1, n2) || 1;
+        const force = spring_k * (dist - rest_length);
+        const dx = (n2.x - n1.x) / dist;
+        const dy = (n2.y - n1.y) / dist;
+        if (!n1.isDragging && !n1.animating) {
+          n1.vx += dx * force;
+          n1.vy += dy * force;
+        }
+        if (!n2.isDragging && !n2.animating) {
+          n2.vx -= dx * force;
+          n2.vy -= dy * force;
+        }
+      }
+    }
+    const centerX = 250;
+    const centerY = 250;
+    for (const node of this.nodes) {
+      if (node.isDragging || node.animating)
+        continue;
+      const dx = centerX - node.x;
+      const dy = centerY - node.y;
+      node.vx += dx * gravity;
+      node.vy += dy * gravity;
+    }
+    const damping = 0.72;
+    for (const node of this.nodes) {
+      if (node.isDragging || node.animating)
+        continue;
+      node.x += node.vx;
+      node.y += node.vy;
+      node.vx *= damping;
+      node.vy *= damping;
+    }
+    for (const node of this.nodes) {
+      if (node.type === "cell") {
+        const pConn = getConnectedPort(node.id, 0, this.wires);
+        if (pConn) {
+          const targetNode = this.nodes.find((n) => n.id === pConn.nodeId);
+          if (targetNode) {
+            node.angle = Math.atan2(targetNode.y - node.y, targetNode.x - node.x);
+          }
+        } else {
+          node.angle = -Math.PI / 2;
+        }
+      }
+    }
+  }
+  centerNet() {
+    if (this.nodes.length === 0) {
+      this.panX = 0;
+      this.panY = 0;
+      this.zoom = 1;
+      this.updateViewportTransform();
+      return;
+    }
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const node of this.nodes) {
+      minX = Math.min(minX, node.x);
+      maxX = Math.max(maxX, node.x);
+      minY = Math.min(minY, node.y);
+      maxY = Math.max(maxY, node.y);
+    }
+    const netWidth = maxX - minX;
+    const netHeight = maxY - minY;
+    const netCenterX = minX + netWidth / 2;
+    const netCenterY = minY + netHeight / 2;
+    const svgRect = this.svg.getBoundingClientRect();
+    let svgW = svgRect.width;
+    let svgH = svgRect.height;
+    if (svgW === 0 || svgH === 0) {
+      svgW = this.svg.clientWidth || this.svg.parentElement?.clientWidth || 800;
+      svgH = this.svg.clientHeight || this.svg.parentElement?.clientHeight || 600;
+    }
+    const padding = 100;
+    const zoomX = (svgW - padding * 2) / Math.max(netWidth, 1);
+    const zoomY = (svgH - padding * 2) / Math.max(netHeight, 1);
+    this.zoom = Math.max(0.4, Math.min(zoomX, zoomY, 1.5));
+    this.panX = svgW / 2 - netCenterX * this.zoom;
+    this.panY = svgH / 2 - netCenterY * this.zoom;
+    this.updateViewportTransform();
+  }
+  startLoop() {
+    const loop = (time) => {
+      if (this.isRunning && this.animations.length === 0) {
+        const interval = 1000 / this.simSpeed;
+        if (time - this.lastStepTime >= interval) {
+          this.simStep();
+          this.lastStepTime = time;
+        }
+      }
+      this.applyPhysics();
+      this.updateAnimations(time);
+      this.renderSVG();
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+  updateAnimations(time) {
+    const completedAnimIds = [];
+    for (const anim of this.animations) {
+      const elapsed = time - anim.startTime;
+      const progress = Math.min(1, elapsed / anim.duration);
+      if (progress < 0.4) {
+        anim.phase = "merge";
+      } else if (progress >= 0.4 && progress < 0.55) {
+        anim.phase = "spark";
+      } else if (progress >= 0.55 && progress < 1) {
+        anim.phase = "expand";
+      } else {
+        anim.phase = "done";
+        completedAnimIds.push(anim.id);
+      }
+    }
+    if (completedAnimIds.length > 0) {
+      this.animations = this.animations.filter((a) => !completedAnimIds.includes(a.id));
+      this.nodes.forEach((node) => {
+        node.animating = false;
+      });
+    }
+  }
+  renderSVG() {
+    const cellsVal = document.getElementById("stat-cells");
+    const wiresVal = document.getElementById("stat-wires");
+    const freeVal = document.getElementById("stat-free-ports");
+    const activeVal = document.getElementById("stat-active-pairs");
+    const cellsCount = this.nodes.filter((n) => n.type === "cell").length;
+    const freeCount = this.nodes.filter((n) => n.type === "free").length;
+    cellsVal.innerText = cellsCount.toString();
+    wiresVal.innerText = this.wires.length.toString();
+    freeVal.innerText = freeCount.toString();
+    let activeCount = 0;
+    this.wires.forEach((wire) => {
+      const isRedex = wire.fromPortIndex === 0 && wire.toPortIndex === 0 && this.nodes.find((n) => n.id === wire.fromNodeId)?.type === "cell" && this.nodes.find((n) => n.id === wire.toNodeId)?.type === "cell";
+      wire.isRedex = isRedex;
+      if (isRedex)
+        activeCount++;
+    });
+    activeVal.innerText = (activeCount / 2).toString();
+    this.wiresGroup.innerHTML = "";
+    this.cellsGroup.innerHTML = "";
+    this.portsGroup.innerHTML = "";
+    const system = SYSTEMS[this.systemKey];
+    this.wires.forEach((wire) => {
+      const n1 = this.nodes.find((n) => n.id === wire.fromNodeId);
+      const n2 = this.nodes.find((n) => n.id === wire.toNodeId);
+      if (n1 && n2) {
+        const arity1 = system.symbols[n1.symbol]?.arity ?? 0;
+        const arity2 = system.symbols[n2.symbol]?.arity ?? 0;
+        const p1 = getPortCoordinate(n1, wire.fromPortIndex, arity1);
+        const p2 = getPortCoordinate(n2, wire.toPortIndex, arity2);
+        let d1 = { x: 0, y: 0 };
+        let d2 = { x: 0, y: 0 };
+        if (n1.type === "cell") {
+          const a1 = n1.angle ?? -Math.PI / 2;
+          if (wire.fromPortIndex === 0) {
+            d1 = { x: Math.cos(a1), y: Math.sin(a1) };
+          } else {
+            d1 = { x: -Math.cos(a1), y: -Math.sin(a1) };
+          }
+        }
+        if (n2.type === "cell") {
+          const a2 = n2.angle ?? -Math.PI / 2;
+          if (wire.toPortIndex === 0) {
+            d2 = { x: Math.cos(a2), y: Math.sin(a2) };
+          } else {
+            d2 = { x: -Math.cos(a2), y: -Math.sin(a2) };
+          }
+        }
+        const dist = getDistance(p1, p2);
+        const curvatureScale = Math.min(45, dist / 2.5);
+        const cp1x = p1.x + d1.x * curvatureScale;
+        const cp1y = p1.y + d1.y * curvatureScale;
+        const cp2x = p2.x + d2.x * curvatureScale;
+        const cp2y = p2.y + d2.y * curvatureScale;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", `wire-path ${wire.isRedex ? "active" : ""}`);
+        if (isNaN(p1.x) || isNaN(p1.y) || isNaN(p2.x) || isNaN(p2.y)) {
+          return;
+        }
+        const dAttr = isNaN(cp1x) || isNaN(cp1y) || isNaN(cp2x) || isNaN(cp2y) ? `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}` : `M ${p1.x} ${p1.y} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y}`;
+        path.setAttribute("d", dAttr);
+        path.setAttribute("data-wire-id", wire.id);
+        this.wiresGroup.appendChild(path);
+      }
+    });
+    this.nodes.forEach((node) => {
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("class", `cell-g ${node.isDragging ? "dragging" : ""}`);
+      if (node.type === "free") {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", node.x.toString());
+        circle.setAttribute("cy", node.y.toString());
+        circle.setAttribute("r", "7");
+        circle.setAttribute("class", "free-port-node");
+        circle.setAttribute("data-node-id", node.id);
+        circle.setAttribute("data-port-node-id", node.id);
+        circle.setAttribute("data-port-index", "0");
+        g.appendChild(circle);
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", node.x.toString());
+        label.setAttribute("y", (node.y - 12).toString());
+        label.setAttribute("font-family", "sans-serif");
+        label.setAttribute("font-size", "9px");
+        label.setAttribute("fill", "#94a3b8");
+        label.setAttribute("text-anchor", "middle");
+        label.textContent = "free";
+        g.appendChild(label);
+      } else {
+        const sym = system.symbols[node.symbol];
+        const theta = node.angle !== undefined && !isNaN(node.angle) ? node.angle : -Math.PI / 2;
+        if (sym.arity > 0) {
+          const R_back = 12;
+          const spacing = 16;
+          const bx = node.x - R_back * Math.cos(theta);
+          const by = node.y - R_back * Math.sin(theta);
+          const ux = -Math.sin(theta);
+          const uy = Math.cos(theta);
+          const apexX = node.x + 22 * Math.cos(theta);
+          const apexY = node.y + 22 * Math.sin(theta);
+          const leftCornerX = bx + (-spacing * sym.arity / 2 - 4) * ux;
+          const leftCornerY = by + (-spacing * sym.arity / 2 - 4) * uy;
+          const rightCornerX = bx + (spacing * sym.arity / 2 + 4) * ux;
+          const rightCornerY = by + (spacing * sym.arity / 2 + 4) * uy;
+          const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+          triangle.setAttribute("points", `${apexX},${apexY} ${leftCornerX},${leftCornerY} ${rightCornerX},${rightCornerY}`);
+          triangle.setAttribute("class", "cell-triangle");
+          triangle.setAttribute("fill", sym.color);
+          triangle.setAttribute("stroke", sym.color);
+          triangle.setAttribute("data-node-id", node.id);
+          g.appendChild(triangle);
+        } else {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", node.x.toString());
+          circle.setAttribute("cy", node.y.toString());
+          circle.setAttribute("r", "15");
+          circle.setAttribute("class", "cell-triangle");
+          circle.setAttribute("fill", sym.color);
+          circle.setAttribute("stroke", sym.color);
+          circle.setAttribute("data-node-id", node.id);
+          g.appendChild(circle);
+        }
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const offsetDist = sym.arity > 0 ? -2 : 0;
+        text.setAttribute("x", (node.x + offsetDist * Math.cos(theta)).toString());
+        text.setAttribute("y", (node.y + offsetDist * Math.sin(theta)).toString());
+        text.setAttribute("class", "cell-label-text");
+        text.textContent = sym.labelChar;
+        g.appendChild(text);
+        for (let i = 0;i <= sym.arity; i++) {
+          const coord = getPortCoordinate(node, i, sym.arity);
+          const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          dot.setAttribute("cx", coord.x.toString());
+          dot.setAttribute("cy", coord.y.toString());
+          dot.setAttribute("r", i === 0 ? "4.5" : "3.5");
+          dot.setAttribute("class", `port-dot ${i === 0 ? "principal" : "auxiliary"}`);
+          dot.setAttribute("data-port-node-id", node.id);
+          dot.setAttribute("data-port-index", i.toString());
+          const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+          title.textContent = i === 0 ? "Principal Port" : `Auxiliary Port ${i}`;
+          dot.appendChild(title);
+          this.portsGroup.appendChild(dot);
+        }
+      }
+      this.cellsGroup.appendChild(g);
+    });
+    this.renderRewriteAnimations();
+  }
+  renderRewriteAnimations() {
+    this.interactionGlowsGroup.innerHTML = "";
+    const now = performance.now();
+    for (const anim of this.animations) {
+      const elapsed = now - anim.startTime;
+      const progress = Math.min(1, elapsed / anim.duration);
+      if (progress < 0.45) {
+        const t = progress / 0.45;
+        const rX1 = anim.nodeA.x + (anim.midX - anim.nodeA.x) * t;
+        const rY1 = anim.nodeA.y + (anim.midY - anim.nodeA.y) * t;
+        const rX2 = anim.nodeB.x + (anim.midX - anim.nodeB.x) * t;
+        const rY2 = anim.nodeB.y + (anim.midY - anim.nodeB.y) * t;
+        const drawFadingCell = (x, y, color, symbol, arity, angle) => {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.setAttribute("opacity", (1 - t * 0.7).toString());
+          if (arity > 0) {
+            const apexX = x + 22 * Math.cos(angle);
+            const apexY = y + 22 * Math.sin(angle);
+            const bx = x - 12 * Math.cos(angle);
+            const by = y - 12 * Math.sin(angle);
+            const ux = -Math.sin(angle);
+            const uy = Math.cos(angle);
+            const leftCornerX = bx + (-16 * arity / 2 - 4) * ux;
+            const leftCornerY = by + (-16 * arity / 2 - 4) * uy;
+            const rightCornerX = bx + (16 * arity / 2 + 4) * ux;
+            const rightCornerY = by + (16 * arity / 2 + 4) * uy;
+            const tri = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            tri.setAttribute("points", `${apexX},${apexY} ${leftCornerX},${leftCornerY} ${rightCornerX},${rightCornerY}`);
+            tri.setAttribute("fill", color);
+            tri.setAttribute("stroke", color);
+            tri.setAttribute("stroke-width", "2");
+            tri.setAttribute("opacity", "0.25");
+            g.appendChild(tri);
+          } else {
+            const circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circ.setAttribute("cx", x.toString());
+            circ.setAttribute("cy", y.toString());
+            circ.setAttribute("r", "15");
+            circ.setAttribute("fill", color);
+            circ.setAttribute("stroke", color);
+            circ.setAttribute("stroke-width", "2");
+            circ.setAttribute("opacity", "0.25");
+            g.appendChild(circ);
+          }
+          const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          txt.setAttribute("x", x.toString());
+          txt.setAttribute("y", y.toString());
+          txt.setAttribute("class", "cell-label-text");
+          txt.textContent = symbol;
+          g.appendChild(txt);
+          this.interactionGlowsGroup.appendChild(g);
+        };
+        drawFadingCell(rX1, rY1, anim.nodeA.color, anim.nodeA.symbol, anim.nodeA.arity, anim.nodeA.angle);
+        drawFadingCell(rX2, rY2, anim.nodeB.color, anim.nodeB.symbol, anim.nodeB.arity, anim.nodeB.angle);
+      } else if (progress >= 0.45 && progress < 0.6) {
+        const t = (progress - 0.45) / 0.15;
+        const flash = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        flash.setAttribute("cx", anim.midX.toString());
+        flash.setAttribute("cy", anim.midY.toString());
+        flash.setAttribute("r", (t * 50).toString());
+        flash.setAttribute("fill", "none");
+        flash.setAttribute("stroke", "#ffedd5");
+        flash.setAttribute("stroke-width", "4");
+        flash.setAttribute("opacity", (1 - t).toString());
+        flash.setAttribute("filter", "url(#glow)");
+        this.interactionGlowsGroup.appendChild(flash);
+      }
+    }
+  }
+}
+window.addEventListener("DOMContentLoaded", () => {
+  window.playground = new InteractionPlayground;
+});
+</script></body>
+</html>

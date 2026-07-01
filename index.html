@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+  <style>/* site/index.css */
+html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: #000;
+  background-color: #fff;
+  margin: 0;
+  padding: 1em;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #fff;
+    background-color: #000;
+  }
+}
+
+.pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 1em;
+}
+
+.page-item {
+  padding: .5em;
+}
+</style></head>
+  <body>
+    <div class="title">cool-browser-demos</div>
+    <div id="pages-list"></div>
+    
+  <script type="module">// site/index.tsx
+var pages = [
+  {
+    name: "falling-sand-v1",
+    path: "falling-sand-v1"
+  },
+  {
+    name: "interaction-nets-playground-v1",
+    path: "interaction-nets-playground-v1"
+  },
+  {
+    name: "planet-sim-v1",
+    path: "planet-sim-v1"
+  },
+  {
+    name: "procgen-skateboarding-v2",
+    path: "procgen-skateboarding-v2"
+  },
+  {
+    name: "magnetism-v1",
+    path: "magnetism-v1"
+  },
+  {
+    name: "lambda-graph-v1",
+    path: "lambda-graph-v1"
+  },
+  {
+    name: "fractal-bonsai-v1",
+    path: "fractal-bonsai-v1"
+  },
+  {
+    name: "runner-game-v2",
+    path: "runner-game-v2"
+  },
+  {
+    name: "visual-cli-v1",
+    path: "visual-cli-v1"
+  },
+  {
+    name: "driving-sim-v1",
+    path: "driving-sim-v1"
+  },
+  {
+    name: "driving-sim",
+    path: "driving-sim"
+  },
+  {
+    name: "ortho-dungeon-v1",
+    path: "ortho-dungeon-v1"
+  },
+  {
+    name: "interaction-nets-playground-v2",
+    path: "interaction-nets-playground-v2"
+  },
+  {
+    name: "procgen-skateboarding-v1",
+    path: "procgen-skateboarding-v1"
+  },
+  {
+    name: "magnetism-v2",
+    path: "magnetism-v2"
+  },
+  {
+    name: "template-v1",
+    path: "template-v1"
+  },
+  {
+    name: "runner-game-v1",
+    path: "runner-game-v1"
+  }
+];
+var pagesList = document.getElementById("pages-list");
+for (const page of pages) {
+  const item = document.createElement("div");
+  item.classList.add("page-item");
+  pagesList.appendChild(item);
+  const anchor = document.createElement("a");
+  item.appendChild(anchor);
+  anchor.classList.add("page-anchor");
+  anchor.href = `./${page.path}`;
+  anchor.innerText = page.name;
+}
+</script></body>
+</html>

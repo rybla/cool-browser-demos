@@ -1,0 +1,2286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pyroclast | Advanced Falling Sand Physics Sandbox</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    
+  <style>/* site/falling-sand-v1/index.css */
+:root {
+  --bg-color: #0b0f19;
+  --panel-bg: #0f172aa6;
+  --panel-border: #ffffff14;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-color: #3b82f6;
+  --accent-glow: #3b82f666;
+  --color-empty: #0f172a;
+  --color-sand: #eab308;
+  --color-water: #0ea5e9;
+  --color-stone: #64748b;
+  --color-moss: #10b981;
+  --color-lava: #f97316;
+  --color-steam: #cbd5e1;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  font-family: Outfit, Inter, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, sans-serif;
+}
+
+header {
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  z-index: 10;
+  background: #0f172acc;
+  justify-content: space-between;
+  align-items:  center;
+  padding: 12px 24px;
+}
+
+.brand {
+  display: flex;
+  align-items:  center;
+  gap: 12px;
+}
+
+.brand h1 {
+  letter-spacing: .15em;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.brand-badge {
+  color: #60a5fa;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: #3b82f626;
+  border: 1px solid #3b82f64d;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: .7rem;
+  font-weight: 600;
+}
+
+.hud-stats-header {
+  display: flex;
+  color: var(--text-secondary);
+  gap: 16px;
+  font-family: monospace;
+  font-size: .8rem;
+}
+
+.stat-item span {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.workspace {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+}
+
+.sidebar {
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--panel-border);
+  display: flex;
+  z-index: 5;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 20px;
+  width: 280px;
+  padding: 20px;
+}
+
+.sidebar.right-sidebar {
+  border-right: none;
+  border-left: 1px solid var(--panel-border);
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.section-title {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.materials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.btn-material {
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  background: #1e293b80;
+  border-radius: 8px;
+  flex-direction: column;
+  align-items:  center;
+  gap: 6px;
+  padding: 12px 8px;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+.btn-material:before {
+  content: "";
+  position: absolute;
+  background: none;
+  width: 4px;
+  height: 100%;
+  transition: background-color .2s;
+  top: 0;
+  left: 0;
+}
+
+.btn-material:hover {
+  color: var(--text-primary);
+  background: #1e293bcc;
+  border-color: #ffffff26;
+  transform: translateY(-1px);
+}
+
+.btn-material.active {
+  color: var(--text-primary);
+  border-color: var(--mat-color);
+  box-shadow: 0 0 12px rgba(var(--mat-rgb), .2);
+  background: #1e293bf2;
+}
+
+.btn-material.active:before {
+  background-color: var(--mat-color);
+}
+
+.btn-material .dot {
+  background-color: var(--mat-color);
+  box-shadow: 0 0 8px var(--mat-color);
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.btn-tool {
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  background: #1e293b66;
+  border-radius: 8px;
+  justify-content: center;
+  align-items:  center;
+  gap: 6px;
+  padding: 10px;
+  transition: all .2s;
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+.btn-tool:hover {
+  color: var(--text-primary);
+  background: #1e293bb3;
+}
+
+.btn-tool.active {
+  background: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-label-row {
+  display: flex;
+  color: var(--text-secondary);
+  justify-content: space-between;
+  font-size: .8rem;
+}
+
+.control-value {
+  color: var(--text-primary);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  background: #ffffff1a;
+  border-radius: 3px;
+  width: 100%;
+  height: 6px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: var(--accent-color);
+  box-shadow: 0 0 6px var(--accent-glow);
+  cursor: pointer;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  transition: transform .1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.toggle-control {
+  display: flex;
+  cursor: pointer;
+  justify-content: space-between;
+  align-items:  center;
+  padding: 4px 0;
+}
+
+.toggle-switch {
+  position: relative;
+  background: #ffffff1a;
+  border-radius: 10px;
+  width: 40px;
+  height: 20px;
+  transition: background-color .2s;
+}
+
+.toggle-switch:after {
+  content: "";
+  position: absolute;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  transition: transform .2s, background-color .2s;
+  top: 2px;
+  left: 2px;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"]:checked + .toggle-switch {
+  background: var(--accent-color);
+}
+
+input[type="checkbox"]:checked + .toggle-switch:after {
+  background: #fff;
+  transform: translateX(20px);
+}
+
+.canvas-container {
+  display: flex;
+  position: relative;
+  background: #020617;
+  flex: 1;
+  justify-content: center;
+  align-items:  center;
+  padding: 24px;
+}
+
+canvas {
+  aspect-ratio: 4 / 3;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  background: #000;
+  border-radius: 12px;
+  max-width: 100%;
+  max-height: 100%;
+  transition: box-shadow .3s;
+  box-shadow: 0 20px 40px #000c, 0 0 40px #3b82f60d;
+}
+
+.bottom-bar {
+  position: absolute;
+  display: flex;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  z-index: 10;
+  background: #0f172ad9;
+  border-radius: 100px;
+  gap: 12px;
+  padding: 8px 16px;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 25px #00000080;
+}
+
+.btn-ctrl {
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  justify-content: center;
+  align-items:  center;
+  width: 38px;
+  height: 38px;
+  transition: all .2s;
+}
+
+.btn-ctrl:hover {
+  color: var(--text-primary);
+  background: #ffffff14;
+}
+
+.btn-ctrl.active {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.btn-ctrl svg {
+  fill: currentColor;
+  width: 20px;
+  height: 20px;
+}
+
+.divider {
+  background: var(--panel-border);
+  align-self:  center;
+  width: 1px;
+  height: 24px;
+}
+
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 8px;
+}
+
+.btn-preset {
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  background: #1e293b66;
+  border-radius: 8px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  transition: all .2s;
+  font-size: .8rem;
+  font-weight: 500;
+}
+
+.btn-preset:hover {
+  color: var(--text-primary);
+  background: #1e293bcc;
+  border-color: #ffffff26;
+}
+
+.btn-preset span {
+  color: var(--text-muted);
+  font-size: .7rem;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid var(--panel-border);
+  color: var(--text-secondary);
+  z-index: 100;
+  display: none;
+  background: #0f172af2;
+  border-radius: 6px;
+  max-width: 220px;
+  padding: 8px 12px;
+  font-size: .75rem;
+  box-shadow: 0 8px 16px #0006;
+}
+
+.tooltip-title {
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+  }
+}
+</style></head>
+  <body>
+    <!-- Brand Header & Top HUD -->
+    <header>
+      <div class="brand">
+        <h1>PYROCLAST</h1>
+        <span class="brand-badge">Engine v1.2</span>
+      </div>
+      <div class="hud-stats-header">
+        <div class="stat-item">FPS: <span id="hud-fps">0</span></div>
+        <div class="stat-item">
+          Particles: <span id="hud-particles">0</span>
+        </div>
+        <div class="stat-item">
+          Physics: <span id="hud-physics-ms">0.0ms</span>
+        </div>
+        <div class="stat-item">
+          Render: <span id="hud-render-ms">0.0ms</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+      <!-- Left Sidebar: Elements & Tools -->
+      <div class="sidebar">
+        <!-- Elements Section -->
+        <div class="sidebar-section">
+          <h2 class="section-title">Elements</h2>
+          <div class="materials-grid" id="materials-grid">
+            <!-- Dynamically populated, but hardcoded here for layout safety -->
+            <button
+              class="btn-material active"
+              data-material="sand"
+              style="--mat-color: var(--color-sand); --mat-rgb: 234, 179, 8"
+            >
+              <span class="dot"></span>
+              Sand
+            </button>
+            <button
+              class="btn-material"
+              data-material="water"
+              style="--mat-color: var(--color-water); --mat-rgb: 14, 165, 233)"
+            >
+              <span class="dot"></span>
+              Water
+            </button>
+            <button
+              class="btn-material"
+              data-material="stone"
+              style="--mat-color: var(--color-stone); --mat-rgb: 100, 116, 139)"
+            >
+              <span class="dot"></span>
+              Stone
+            </button>
+            <button
+              class="btn-material"
+              data-material="moss"
+              style="--mat-color: var(--color-moss); --mat-rgb: 16, 185, 129)"
+            >
+              <span class="dot"></span>
+              Moss
+            </button>
+            <button
+              class="btn-material"
+              data-material="lava"
+              style="--mat-color: var(--color-lava); --mat-rgb: 249, 115, 22)"
+            >
+              <span class="dot"></span>
+              Lava
+            </button>
+            <button
+              class="btn-material"
+              data-material="steam"
+              style="--mat-color: var(--color-steam); --mat-rgb: 203, 213, 225)"
+            >
+              <span class="dot"></span>
+              Steam
+            </button>
+          </div>
+        </div>
+
+        <!-- Brush & Eraser Tools -->
+        <div class="sidebar-section">
+          <h2 class="section-title">Tools</h2>
+          <div class="tools-grid">
+            <button class="btn-tool active" id="tool-draw">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"
+                />
+              </svg>
+              Draw
+            </button>
+            <button class="btn-tool" id="tool-erase">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21Z"
+                />
+                <path d="M22 21H7M18 12 9 3" />
+              </svg>
+              Erase
+            </button>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="sidebar-section">
+          <h2 class="section-title">World Presets</h2>
+          <div class="presets-grid">
+            <button class="btn-preset" data-preset="moss-cave">
+              Mossy Cavern
+              <span>Dripping cave lined with glowing bioluminescent moss</span>
+            </button>
+            <button class="btn-preset" data-preset="water-cycle">
+              Thermal Water Cycle
+              <span
+                >Lava vaporizes water; steam condenses on stone ceilings</span
+              >
+            </button>
+            <button class="btn-preset" data-preset="lava-fissure">
+              Volcanic Rift
+              <span>Lava flowing through stone arches, melting layers</span>
+            </button>
+            <button class="btn-preset" data-preset="stone-collapse">
+              Structural Collapse
+              <span>Suspended stone chunks falling and dispersing fluids</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Simulation Canvas & Floating Controls -->
+      <div class="canvas-container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+
+        <!-- Floating Simulation Play/Pause Bar -->
+        <div class="bottom-bar">
+          <button
+            class="btn-ctrl active"
+            id="btn-play-pause"
+            title="Play/Pause (Space)"
+          >
+            <!-- Pause Icon -->
+            <svg id="icon-pause" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+            </svg>
+            <!-- Play Icon (hidden by default) -->
+            <svg id="icon-play" viewBox="0 0 24 24" style="display: none">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+          <button class="btn-ctrl" id="btn-step" title="Step 1 Frame (S)">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 18l8.5-6L6 6v12zm9-12v12h2V6h-2z" />
+            </svg>
+          </button>
+          <div class="divider"></div>
+          <button
+            class="btn-ctrl"
+            id="btn-speed-1x"
+            class="active"
+            title="Sim Speed 1x"
+          >
+            <span style="font-weight: 800; font-size: 0.75rem">1x</span>
+          </button>
+          <button class="btn-ctrl" id="btn-speed-2x" title="Sim Speed 2x">
+            <span style="font-weight: 800; font-size: 0.75rem">2x</span>
+          </button>
+          <button class="btn-ctrl" id="btn-speed-4x" title="Sim Speed 4x">
+            <span style="font-weight: 800; font-size: 0.75rem">4x</span>
+          </button>
+          <div class="divider"></div>
+          <button class="btn-ctrl" id="btn-clear" title="Clear Screen (C)">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M15 16h4v2h-4zm0-6h4v2h-4zm0-6h4v2h-4zM3 18c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V8H3v10zM14 5h-3l-1-1H6L5 5H2v2h12z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Configuration Sliders -->
+      <div class="sidebar right-sidebar">
+        <!-- Brush Settings -->
+        <div class="sidebar-section">
+          <h2 class="section-title">Brush Configuration</h2>
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Brush Size</span>
+              <span class="control-value" id="val-brush-size">5</span>
+            </div>
+            <input
+              type="range"
+              id="slider-brush-size"
+              min="1"
+              max="15"
+              value="5"
+            />
+          </div>
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Brush Style</span>
+            </div>
+            <div class="tools-grid">
+              <button class="btn-tool active" id="brush-round">Round</button>
+              <button class="btn-tool" id="brush-spray">Spray</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Physics -->
+        <div class="sidebar-section">
+          <h2 class="section-title">World Physics</h2>
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Gravity Force</span>
+              <span class="control-value" id="val-gravity">1.0</span>
+            </div>
+            <input
+              type="range"
+              id="slider-gravity"
+              min="0.0"
+              max="2.0"
+              step="0.2"
+              value="1.0"
+            />
+          </div>
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Moss Growth Rate</span>
+              <span class="control-value" id="val-moss-growth">50%</span>
+            </div>
+            <input
+              type="range"
+              id="slider-moss-growth"
+              min="0"
+              max="100"
+              value="50"
+            />
+          </div>
+        </div>
+
+        <!-- Aesthetics / Advanced Lighting -->
+        <div class="sidebar-section">
+          <h2 class="section-title">Aesthetics & Lighting</h2>
+
+          <label class="toggle-control">
+            <span>Mouse Flashlight</span>
+            <input type="checkbox" id="toggle-flashlight" checked />
+            <div class="toggle-switch"></div>
+          </label>
+
+          <label class="toggle-control">
+            <span>Top Sunlight</span>
+            <input type="checkbox" id="toggle-sunlight" checked />
+            <div class="toggle-switch"></div>
+          </label>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Light Intensity</span>
+              <span class="control-value" id="val-light-intensity">1.0</span>
+            </div>
+            <input
+              type="range"
+              id="slider-light-intensity"
+              min="0.2"
+              max="2.0"
+              step="0.1"
+              value="1.0"
+            />
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Render Mode</span>
+            </div>
+            <select
+              id="select-render-mode"
+              style="
+                background: rgba(30, 41, 59, 0.6);
+                border: 1px solid var(--panel-border);
+                border-radius: 6px;
+                padding: 8px;
+                color: var(--text-primary);
+                outline: none;
+                font-size: 0.85rem;
+                cursor: pointer;
+              "
+            >
+              <option value="normal">Normal (Lit + AO)</option>
+              <option value="lighting-only">Lighting Only (Lightmap)</option>
+              <option value="ao-only">Ambient Occlusion Only</option>
+              <option value="flat">Flat Particles (No Lighting)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Tooltip overlay -->
+    <div class="tooltip" id="tooltip">
+      <div class="tooltip-title" id="tooltip-title">Element Name</div>
+      <div id="tooltip-desc">Description of the physics and interactions.</div>
+    </div>
+
+    <!-- Main JS Application script -->
+    
+  <script type="module">// site/falling-sand-v1/index.tsx
+var WIDTH = 200;
+var HEIGHT = 150;
+var CANVAS_WIDTH = 800;
+var CANVAS_HEIGHT = 600;
+var CELL_SIZE = 4;
+var LIGHT_W = 100;
+var LIGHT_H = 75;
+var LIGHT_CELL_SIZE = 8;
+var types = new Uint8Array(WIDTH * HEIGHT);
+var colorsR = new Uint8Array(WIDTH * HEIGHT);
+var colorsG = new Uint8Array(WIDTH * HEIGHT);
+var colorsB = new Uint8Array(WIDTH * HEIGHT);
+var life = new Float32Array(WIDTH * HEIGHT);
+var lastUpdate = new Uint32Array(WIDTH * HEIGHT);
+var visualX = new Float32Array(WIDTH * HEIGHT);
+var visualY = new Float32Array(WIDTH * HEIGHT);
+var lightR = new Float32Array(LIGHT_W * LIGHT_H);
+var lightG = new Float32Array(LIGHT_W * LIGHT_H);
+var lightB = new Float32Array(LIGHT_W * LIGHT_H);
+var lightOpacity = new Float32Array(LIGHT_W * LIGHT_H);
+var isPaused = false;
+var simSpeed = 1;
+var gravityForce = 1;
+var mossGrowthRate = 0.5;
+var brushSize = 5;
+var brushStyle = "round";
+var currentMaterial = 1 /* SAND */;
+var currentTool = "draw";
+var toggleFlashlight = true;
+var toggleSunlight = true;
+var lightIntensityVal = 1;
+var renderMode = "normal";
+var mouseX = -1000;
+var mouseY = -1000;
+var isMouseDown = false;
+var frameCount = 0;
+var lastTime = performance.now();
+var fpsCount = 0;
+var currentFps = 60;
+var renderMs = 0;
+function initGrid() {
+  for (let i = 0;i < WIDTH * HEIGHT; i++) {
+    types[i] = 0 /* EMPTY */;
+    colorsR[i] = 15;
+    colorsG[i] = 23;
+    colorsB[i] = 42;
+    life[i] = 0;
+    lastUpdate[i] = 0;
+    visualX[i] = i % WIDTH;
+    visualY[i] = Math.floor(i / WIDTH);
+  }
+}
+function setElementColor(i, type) {
+  const rand = Math.random();
+  switch (type) {
+    case 1 /* SAND */:
+      colorsR[i] = 210 + Math.floor(rand * 45);
+      colorsG[i] = 160 + Math.floor(rand * 50);
+      colorsB[i] = 30 + Math.floor(rand * 30);
+      break;
+    case 2 /* WATER */:
+      colorsR[i] = 14 + Math.floor(rand * 20);
+      colorsG[i] = 110 + Math.floor(rand * 55);
+      colorsB[i] = 210 + Math.floor(rand * 45);
+      break;
+    case 3 /* STONE */: {
+      const grey = 80 + Math.floor(rand * 40);
+      colorsR[i] = grey;
+      colorsG[i] = grey + Math.floor(rand * 8 - 4);
+      colorsB[i] = grey + Math.floor(rand * 12 - 6);
+      break;
+    }
+    case 4 /* MOSS */:
+      colorsR[i] = 10 + Math.floor(rand * 25);
+      colorsG[i] = 160 + Math.floor(rand * 60);
+      colorsB[i] = 60 + Math.floor(rand * 30);
+      break;
+    case 5 /* LAVA */:
+      colorsR[i] = 220 + Math.floor(rand * 35);
+      colorsG[i] = 50 + Math.floor(rand * 70);
+      colorsB[i] = 10 + Math.floor(rand * 15);
+      break;
+    case 6 /* STEAM */: {
+      const steamVal = 200 + Math.floor(rand * 45);
+      colorsR[i] = steamVal;
+      colorsG[i] = steamVal;
+      colorsB[i] = steamVal + 10;
+      break;
+    }
+    default:
+      colorsR[i] = 15;
+      colorsG[i] = 23;
+      colorsB[i] = 42;
+      break;
+  }
+}
+function setCell(x, y, type, customLife = 0) {
+  if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+    return;
+  const idx = y * WIDTH + x;
+  types[idx] = type;
+  life[idx] = customLife === 0 && type === 6 /* STEAM */ ? 100 + Math.random() * 150 : customLife;
+  setElementColor(idx, type);
+  lastUpdate[idx] = frameCount;
+  visualX[idx] = x;
+  visualY[idx] = y;
+}
+function swapCells(idx1, idx2) {
+  const type1 = types[idx1] ?? 0 /* EMPTY */;
+  const r1 = colorsR[idx1] ?? 0;
+  const g1 = colorsG[idx1] ?? 0;
+  const b1 = colorsB[idx1] ?? 0;
+  const l1 = life[idx1] ?? 0;
+  const u1 = lastUpdate[idx1] ?? 0;
+  const vx1 = visualX[idx1] ?? 0;
+  const vy1 = visualY[idx1] ?? 0;
+  types[idx1] = types[idx2] ?? 0 /* EMPTY */;
+  colorsR[idx1] = colorsR[idx2] ?? 0;
+  colorsG[idx1] = colorsG[idx2] ?? 0;
+  colorsB[idx1] = colorsB[idx2] ?? 0;
+  life[idx1] = life[idx2] ?? 0;
+  lastUpdate[idx1] = lastUpdate[idx2] ?? 0;
+  visualX[idx1] = visualX[idx2] ?? 0;
+  visualY[idx1] = visualY[idx2] ?? 0;
+  types[idx2] = type1;
+  colorsR[idx2] = r1;
+  colorsG[idx2] = g1;
+  colorsB[idx2] = b1;
+  life[idx2] = l1;
+  lastUpdate[idx2] = u1;
+  visualX[idx2] = vx1;
+  visualY[idx2] = vy1;
+}
+function displaceCell(srcIdx, destX, destY) {
+  const destIdx = destY * WIDTH + destX;
+  if (types[destIdx] === 0 /* EMPTY */) {
+    swapCells(srcIdx, destIdx);
+    return true;
+  }
+  const directions = [
+    [0, -1],
+    [-1, -1],
+    [1, -1],
+    [-1, 0],
+    [1, 0],
+    [-1, 1],
+    [1, 1],
+    [0, 1]
+  ];
+  for (const [dx, dy] of directions) {
+    const nx = destX + dx;
+    const ny = destY + dy;
+    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+      const nIdx = ny * WIDTH + nx;
+      if (types[nIdx] === 0 /* EMPTY */ || types[srcIdx] !== 6 /* STEAM */ && types[nIdx] === 6 /* STEAM */ || (types[srcIdx] === 3 /* STONE */ || types[srcIdx] === 1 /* SAND */) && types[nIdx] === 2 /* WATER */) {
+        swapCells(destIdx, nIdx);
+        swapCells(srcIdx, destIdx);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+var visitedStone = new Uint8Array(WIDTH * HEIGHT);
+var chunkMap = new Int32Array(WIDTH * HEIGHT);
+var chunkSupported = new Uint8Array(2000);
+var chunkCount = 0;
+function solveStoneChunkGravity() {
+  visitedStone.fill(0);
+  chunkMap.fill(-1);
+  chunkCount = 0;
+  const queue = [];
+  const chunks = [];
+  for (let y = 0;y < HEIGHT; y++) {
+    for (let x = 0;x < WIDTH; x++) {
+      const i = y * WIDTH + x;
+      if (types[i] === 3 /* STONE */ && visitedStone[i] === 0) {
+        const chunkId = chunkCount++;
+        if (chunkId >= chunkSupported.length)
+          break;
+        visitedStone[i] = 1;
+        chunkMap[i] = chunkId;
+        const currentChunk = [i];
+        queue.push({ x, y });
+        while (queue.length > 0) {
+          const curr = queue.shift();
+          const dirs = [
+            [0, 1],
+            [0, -1],
+            [1, 0],
+            [-1, 0]
+          ];
+          for (const [dx, dy] of dirs) {
+            const nx = curr.x + dx;
+            const ny = curr.y + dy;
+            if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+              const ni = ny * WIDTH + nx;
+              if (types[ni] === 3 /* STONE */ && visitedStone[ni] === 0) {
+                visitedStone[ni] = 1;
+                chunkMap[ni] = chunkId;
+                currentChunk.push(ni);
+                queue.push({ x: nx, y: ny });
+              }
+            }
+          }
+        }
+        chunks.push(currentChunk);
+      }
+    }
+  }
+  if (chunkCount === 0)
+    return;
+  chunkSupported.fill(0, 0, chunkCount);
+  for (let c = 0;c < chunkCount; c++) {
+    const chunkCells = chunks[c] ?? [];
+    let supported = false;
+    for (const cellIdx of chunkCells) {
+      const cy = Math.floor(cellIdx / WIDTH);
+      const cx = cellIdx % WIDTH;
+      if (cy + 1 >= HEIGHT) {
+        supported = true;
+        break;
+      }
+      const belowIdx = (cy + 1) * WIDTH + cx;
+      const belowType = types[belowIdx];
+      if (belowType === 4 /* MOSS */) {
+        supported = true;
+        break;
+      }
+    }
+    if (supported) {
+      chunkSupported[c] = 1;
+    }
+  }
+  let supportChanged = true;
+  let iterations = 0;
+  while (supportChanged && iterations < 15) {
+    supportChanged = false;
+    for (let c = 0;c < chunkCount; c++) {
+      if ((chunkSupported[c] ?? 0) === 1)
+        continue;
+      const chunkCells = chunks[c] ?? [];
+      for (const cellIdx of chunkCells) {
+        const cy = Math.floor(cellIdx / WIDTH);
+        const cx = cellIdx % WIDTH;
+        const belowIdx = (cy + 1) * WIDTH + cx;
+        if (cy + 1 < HEIGHT && types[belowIdx] === 3 /* STONE */) {
+          const belowChunkId = chunkMap[belowIdx] ?? -1;
+          if (belowChunkId !== -1 && belowChunkId !== c && (chunkSupported[belowChunkId] ?? 0) === 1) {
+            chunkSupported[c] = 1;
+            supportChanged = true;
+            break;
+          }
+        }
+      }
+    }
+    iterations++;
+  }
+  const unsupportedChunks = [];
+  for (let c = 0;c < chunkCount; c++) {
+    const chunkCells = chunks[c];
+    if (chunkCells && chunkSupported[c] === 0) {
+      const sortedCells = [...chunkCells].sort((a, b) => b - a);
+      unsupportedChunks.push({ id: c, cells: sortedCells });
+    }
+  }
+  unsupportedChunks.sort((a, b) => {
+    const aVal = a.cells[0] ?? 0;
+    const bVal = b.cells[0] ?? 0;
+    return bVal - aVal;
+  });
+  if (Math.random() < gravityForce) {
+    for (const chunk of unsupportedChunks) {
+      const displacedElements = [];
+      const destinationIndices = [];
+      const sourceIndicesSet = new Set(chunk.cells);
+      for (const cellIdx of chunk.cells) {
+        const cy = Math.floor(cellIdx / WIDTH);
+        const cx = cellIdx % WIDTH;
+        const destIdx = (cy + 1) * WIDTH + cx;
+        destinationIndices.push(destIdx);
+        if (!sourceIndicesSet.has(destIdx)) {
+          displacedElements.push({
+            type: types[destIdx] ?? 0 /* EMPTY */,
+            r: colorsR[destIdx] ?? 0,
+            g: colorsG[destIdx] ?? 0,
+            b: colorsB[destIdx] ?? 0,
+            l: life[destIdx] ?? 0,
+            u: lastUpdate[destIdx] ?? 0,
+            vx: visualX[destIdx] ?? cx,
+            vy: visualY[destIdx] ?? cy
+          });
+        }
+      }
+      for (const cellIdx of chunk.cells) {
+        types[cellIdx] = 0 /* EMPTY */;
+        colorsR[cellIdx] = 15;
+        colorsG[cellIdx] = 23;
+        colorsB[cellIdx] = 42;
+        life[cellIdx] = 0;
+        visualX[cellIdx] = cellIdx % WIDTH;
+        visualY[cellIdx] = Math.floor(cellIdx / WIDTH);
+      }
+      for (const cellIdx of chunk.cells) {
+        const cy = Math.floor(cellIdx / WIDTH);
+        const cx = cellIdx % WIDTH;
+        const destIdx = (cy + 1) * WIDTH + cx;
+        types[destIdx] = 3 /* STONE */;
+        setElementColor(destIdx, 3 /* STONE */);
+        lastUpdate[destIdx] = frameCount;
+        visualX[destIdx] = cx;
+        visualY[destIdx] = cy;
+      }
+      const vacatedIndices = [];
+      for (const cellIdx of chunk.cells) {
+        if (types[cellIdx] === 0 /* EMPTY */) {
+          vacatedIndices.push(cellIdx);
+        }
+      }
+      let displacedPtr = 0;
+      for (const vacIdx of vacatedIndices) {
+        if (displacedPtr >= displacedElements.length)
+          break;
+        const elem = displacedElements[displacedPtr++];
+        if (!elem)
+          continue;
+        types[vacIdx] = elem.type;
+        colorsR[vacIdx] = elem.r;
+        colorsG[vacIdx] = elem.g;
+        colorsB[vacIdx] = elem.b;
+        life[vacIdx] = elem.l;
+        lastUpdate[vacIdx] = frameCount;
+        visualX[vacIdx] = elem.vx;
+        visualY[vacIdx] = elem.vy;
+      }
+      while (displacedPtr < displacedElements.length) {
+        const elem = displacedElements[displacedPtr++];
+        if (!elem)
+          continue;
+        const bottomCell = chunk.cells[0] ?? 0;
+        const bx = bottomCell % WIDTH;
+        const by = Math.floor(bottomCell / WIDTH);
+        let placed = false;
+        for (let dy = -2;dy <= 2 && !placed; dy++) {
+          for (let dx = -2;dx <= 2; dx++) {
+            const nx = bx + dx;
+            const ny = by + dy;
+            if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+              const ni = ny * WIDTH + nx;
+              if (types[ni] === 0 /* EMPTY */) {
+                types[ni] = elem.type;
+                colorsR[ni] = elem.r;
+                colorsG[ni] = elem.g;
+                colorsB[ni] = elem.b;
+                life[ni] = elem.l;
+                visualX[ni] = elem.vx;
+                visualY[ni] = elem.vy;
+                placed = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+function updatePhysics() {
+  frameCount++;
+  solveStoneChunkGravity();
+  for (let y = HEIGHT - 1;y >= 0; y--) {
+    const leftToRight = Math.random() < 0.5;
+    const startX = leftToRight ? 0 : WIDTH - 1;
+    const endX = leftToRight ? WIDTH : -1;
+    const stepX = leftToRight ? 1 : -1;
+    for (let x = startX;x !== endX; x += stepX) {
+      const idx = y * WIDTH + x;
+      const type = types[idx];
+      if (type === 0 /* EMPTY */ || type === 3 /* STONE */ || lastUpdate[idx] === frameCount) {
+        continue;
+      }
+      switch (type) {
+        case 1 /* SAND */:
+          handleSand(x, y, idx);
+          break;
+        case 2 /* WATER */:
+          handleWater(x, y, idx);
+          break;
+        case 4 /* MOSS */:
+          handleMoss(x, y, idx);
+          break;
+        case 5 /* LAVA */:
+          handleLava(x, y, idx);
+          break;
+        case 6 /* STEAM */:
+          handleSteam(x, y, idx);
+          break;
+      }
+    }
+  }
+}
+function handleSand(x, y, idx) {
+  if (Math.random() > gravityForce)
+    return;
+  const belowY = y + 1;
+  if (belowY < HEIGHT) {
+    const belowIdx = belowY * WIDTH + x;
+    const belowType = types[belowIdx];
+    if (belowType === 0 /* EMPTY */) {
+      swapCells(idx, belowIdx);
+      return;
+    } else if (belowType === 2 /* WATER */ || belowType === 6 /* STEAM */) {
+      displaceCell(idx, x, belowY);
+      return;
+    }
+    const diagLeftX = x - 1;
+    const diagRightX = x + 1;
+    const tryLeft = Math.random() < 0.5;
+    if (tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      } else if (types[dlIdx] === 2 /* WATER */ || types[dlIdx] === 6 /* STEAM */) {
+        displaceCell(idx, diagLeftX, belowY);
+        return;
+      }
+    }
+    if (diagRightX < WIDTH) {
+      const drIdx = belowY * WIDTH + diagRightX;
+      if (types[drIdx] === 0 /* EMPTY */) {
+        swapCells(idx, drIdx);
+        return;
+      } else if (types[drIdx] === 2 /* WATER */ || types[drIdx] === 6 /* STEAM */) {
+        displaceCell(idx, diagRightX, belowY);
+        return;
+      }
+    }
+    if (!tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      } else if (types[dlIdx] === 2 /* WATER */ || types[dlIdx] === 6 /* STEAM */) {
+        displaceCell(idx, diagLeftX, belowY);
+        return;
+      }
+    }
+  }
+}
+function handleWater(x, y, idx) {
+  if (Math.random() > gravityForce)
+    return;
+  const belowY = y + 1;
+  if (belowY < HEIGHT) {
+    const belowIdx = belowY * WIDTH + x;
+    if (types[belowIdx] === 0 /* EMPTY */) {
+      swapCells(idx, belowIdx);
+      return;
+    } else if (types[belowIdx] === 6 /* STEAM */) {
+      swapCells(idx, belowIdx);
+      return;
+    }
+  }
+  const diagLeftX = x - 1;
+  const diagRightX = x + 1;
+  const tryLeft = Math.random() < 0.5;
+  if (belowY < HEIGHT) {
+    if (tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+    if (diagRightX < WIDTH) {
+      const drIdx = belowY * WIDTH + diagRightX;
+      if (types[drIdx] === 0 /* EMPTY */) {
+        swapCells(idx, drIdx);
+        return;
+      }
+    }
+    if (!tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+  }
+  const sideLeft = x - 1;
+  const sideRight = x + 1;
+  if (tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideLeft);
+    return;
+  }
+  if (sideRight < WIDTH && types[y * WIDTH + sideRight] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideRight);
+    return;
+  }
+  if (!tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideLeft);
+    return;
+  }
+}
+function handleMoss(x, y, idx) {
+  if (Math.random() > mossGrowthRate * 0.05)
+    return;
+  const neighbors = [
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+    [-1, 0],
+    [1, 0],
+    [-1, 1],
+    [0, 1],
+    [1, 1]
+  ];
+  let hasSupport = false;
+  let waterTargetIdx = -1;
+  const emptyTargets = [];
+  for (const [dx, dy] of neighbors) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+      const nIdx = ny * WIDTH + nx;
+      const nType = types[nIdx];
+      if (nType === 3 /* STONE */ || nType === 4 /* MOSS */ || nType === 1 /* SAND */) {
+        hasSupport = true;
+      } else if (nType === 2 /* WATER */) {
+        waterTargetIdx = nIdx;
+      } else if (nType === 0 /* EMPTY */) {
+        emptyTargets.push({ x: nx, y: ny });
+      }
+    }
+  }
+  if (!hasSupport) {
+    if (Math.random() < 0.1) {
+      const belowY = y + 1;
+      if (belowY < HEIGHT && types[belowY * WIDTH + x] === 0 /* EMPTY */) {
+        swapCells(idx, belowY * WIDTH + x);
+      }
+    }
+    return;
+  }
+  if (waterTargetIdx !== -1) {
+    types[waterTargetIdx] = 4 /* MOSS */;
+    setElementColor(waterTargetIdx, 4 /* MOSS */);
+    lastUpdate[waterTargetIdx] = frameCount;
+    visualX[waterTargetIdx] = waterTargetIdx % WIDTH;
+    visualY[waterTargetIdx] = Math.floor(waterTargetIdx / WIDTH);
+    return;
+  }
+  if (emptyTargets.length > 0) {
+    const target = emptyTargets[Math.floor(Math.random() * emptyTargets.length)];
+    if (target) {
+      let targetSupported = false;
+      for (const [dx, dy] of neighbors) {
+        const tx = target.x + dx;
+        const ty = target.y + dy;
+        if (tx >= 0 && tx < WIDTH && ty >= 0 && ty < HEIGHT) {
+          const tType = types[ty * WIDTH + tx];
+          if (tType === 3 /* STONE */ || tType === 4 /* MOSS */ || tType === 1 /* SAND */) {
+            targetSupported = true;
+            break;
+          }
+        }
+      }
+      if (targetSupported) {
+        setCell(target.x, target.y, 4 /* MOSS */);
+      }
+    }
+  }
+}
+function handleLava(x, y, idx) {
+  const checkDirs = [
+    [0, 1],
+    [0, -1],
+    [1, 0],
+    [-1, 0]
+  ];
+  for (const [dx, dy] of checkDirs) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+      const nIdx = ny * WIDTH + nx;
+      const nType = types[nIdx];
+      if (nType === 2 /* WATER */) {
+        setCell(x, y, 3 /* STONE */);
+        setCell(nx, ny, 6 /* STEAM */);
+        return;
+      } else if (nType === 4 /* MOSS */) {
+        setCell(nx, ny, 5 /* LAVA */);
+      } else if (nType === 1 /* SAND */) {
+        if (Math.random() < 0.15) {
+          setCell(nx, ny, 5 /* LAVA */);
+        }
+      } else if (nType === 3 /* STONE */) {
+        if (Math.random() < 0.001) {
+          setCell(nx, ny, 5 /* LAVA */);
+        }
+      }
+    }
+  }
+  if (Math.random() > gravityForce)
+    return;
+  const belowY = y + 1;
+  if (belowY < HEIGHT) {
+    const belowIdx = belowY * WIDTH + x;
+    if (types[belowIdx] === 0 /* EMPTY */) {
+      swapCells(idx, belowIdx);
+      return;
+    } else if (types[belowIdx] === 6 /* STEAM */) {
+      swapCells(idx, belowIdx);
+      return;
+    }
+  }
+  const diagLeftX = x - 1;
+  const diagRightX = x + 1;
+  const tryLeft = Math.random() < 0.5;
+  if (belowY < HEIGHT) {
+    if (tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+    if (diagRightX < WIDTH) {
+      const drIdx = belowY * WIDTH + diagRightX;
+      if (types[drIdx] === 0 /* EMPTY */) {
+        swapCells(idx, drIdx);
+        return;
+      }
+    }
+    if (!tryLeft && diagLeftX >= 0) {
+      const dlIdx = belowY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+  }
+  if (Math.random() < 0.25) {
+    const sideLeft = x - 1;
+    const sideRight = x + 1;
+    if (tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+      swapCells(idx, y * WIDTH + sideLeft);
+      return;
+    }
+    if (sideRight < WIDTH && types[y * WIDTH + sideRight] === 0 /* EMPTY */) {
+      swapCells(idx, y * WIDTH + sideRight);
+      return;
+    }
+    if (!tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+      swapCells(idx, y * WIDTH + sideLeft);
+      return;
+    }
+  }
+}
+function handleSteam(x, y, idx) {
+  const aboveY = y - 1;
+  const l = (life[idx] ?? 0) - 0.5;
+  life[idx] = l;
+  if (l <= 0) {
+    types[idx] = 0 /* EMPTY */;
+    setElementColor(idx, 0 /* EMPTY */);
+    return;
+  }
+  const checkCondensation = aboveY >= 0 && types[aboveY * WIDTH + x] === 3 /* STONE */;
+  if (checkCondensation && Math.random() < 0.015) {
+    types[idx] = 2 /* WATER */;
+    setElementColor(idx, 2 /* WATER */);
+    life[idx] = 0;
+    return;
+  }
+  if (aboveY >= 0) {
+    const aboveIdx = aboveY * WIDTH + x;
+    const aboveType = types[aboveIdx];
+    if (aboveType === 0 /* EMPTY */) {
+      swapCells(idx, aboveIdx);
+      return;
+    } else if (aboveType === 2 /* WATER */ || aboveType === 5 /* LAVA */) {
+      swapCells(idx, aboveIdx);
+      return;
+    }
+  }
+  const diagLeftX = x - 1;
+  const diagRightX = x + 1;
+  const tryLeft = Math.random() < 0.5;
+  if (aboveY >= 0) {
+    if (tryLeft && diagLeftX >= 0) {
+      const dlIdx = aboveY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+    if (diagRightX < WIDTH) {
+      const drIdx = aboveY * WIDTH + diagRightX;
+      if (types[drIdx] === 0 /* EMPTY */) {
+        swapCells(idx, drIdx);
+        return;
+      }
+    }
+    if (!tryLeft && diagLeftX >= 0) {
+      const dlIdx = aboveY * WIDTH + diagLeftX;
+      if (types[dlIdx] === 0 /* EMPTY */) {
+        swapCells(idx, dlIdx);
+        return;
+      }
+    }
+  }
+  const sideLeft = x - 1;
+  const sideRight = x + 1;
+  if (tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideLeft);
+    return;
+  }
+  if (sideRight < WIDTH && types[y * WIDTH + sideRight] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideRight);
+    return;
+  }
+  if (!tryLeft && sideLeft >= 0 && types[y * WIDTH + sideLeft] === 0 /* EMPTY */) {
+    swapCells(idx, y * WIDTH + sideLeft);
+    return;
+  }
+}
+function updateLighting() {
+  for (let ly = 0;ly < LIGHT_H; ly++) {
+    for (let lx = 0;lx < LIGHT_W; lx++) {
+      const lIdx = ly * LIGHT_W + lx;
+      const px1 = lx * 2;
+      const py1 = ly * 2;
+      let sumOpacity = 0;
+      for (let dy = 0;dy < 2; dy++) {
+        for (let dx = 0;dx < 2; dx++) {
+          const gx = px1 + dx;
+          const gy = py1 + dy;
+          if (gx < WIDTH && gy < HEIGHT) {
+            const gType = types[gy * WIDTH + gx];
+            switch (gType) {
+              case 3 /* STONE */:
+                sumOpacity += 0.96;
+                break;
+              case 1 /* SAND */:
+                sumOpacity += 0.65;
+                break;
+              case 5 /* LAVA */:
+                sumOpacity += 0.4;
+                break;
+              case 4 /* MOSS */:
+                sumOpacity += 0.35;
+                break;
+              case 2 /* WATER */:
+                sumOpacity += 0.12;
+                break;
+              case 6 /* STEAM */:
+                sumOpacity += 0.05;
+                break;
+              default:
+                sumOpacity += 0;
+                break;
+            }
+          }
+        }
+      }
+      lightOpacity[lIdx] = sumOpacity / 4;
+    }
+  }
+  const baseR = 60 * lightIntensityVal;
+  const baseG = 70 * lightIntensityVal;
+  const baseB = 90 * lightIntensityVal;
+  lightR.fill(baseR);
+  lightG.fill(baseG);
+  lightB.fill(baseB);
+  if (toggleSunlight) {
+    const sunIntensity = 200 * lightIntensityVal;
+    for (let lx = 0;lx < LIGHT_W; lx++) {
+      lightR[lx] = Math.max(lightR[lx] ?? 0, sunIntensity);
+      lightG[lx] = Math.max(lightG[lx] ?? 0, sunIntensity * 0.95);
+      lightB[lx] = Math.max(lightB[lx] ?? 0, sunIntensity * 0.9);
+    }
+  }
+  for (let y = 0;y < HEIGHT; y++) {
+    for (let x = 0;x < WIDTH; x++) {
+      const idx = y * WIDTH + x;
+      const type = types[idx];
+      if (type === 5 /* LAVA */) {
+        const lx = Math.floor(x / 2);
+        const ly = Math.floor(y / 2);
+        if (lx < LIGHT_W && ly < LIGHT_H) {
+          const lIdx = ly * LIGHT_W + lx;
+          lightR[lIdx] = Math.max(lightR[lIdx] ?? 0, 255 * lightIntensityVal);
+          lightG[lIdx] = Math.max(lightG[lIdx] ?? 0, 115 * lightIntensityVal);
+          lightB[lIdx] = Math.max(lightB[lIdx] ?? 0, 15 * lightIntensityVal);
+        }
+      } else if (type === 4 /* MOSS */) {
+        const lx = Math.floor(x / 2);
+        const ly = Math.floor(y / 2);
+        if (lx < LIGHT_W && ly < LIGHT_H) {
+          const lIdx = ly * LIGHT_W + lx;
+          lightR[lIdx] = Math.max(lightR[lIdx] ?? 0, 30 * lightIntensityVal);
+          lightG[lIdx] = Math.max(lightG[lIdx] ?? 0, 225 * lightIntensityVal);
+          lightB[lIdx] = Math.max(lightB[lIdx] ?? 0, 65 * lightIntensityVal);
+        }
+      }
+    }
+  }
+  if (toggleFlashlight && mouseX >= 0 && mouseX < CANVAS_WIDTH && mouseY >= 0 && mouseY < CANVAS_HEIGHT) {
+    const mlx = Math.floor(mouseX / LIGHT_CELL_SIZE);
+    const mly = Math.floor(mouseY / LIGHT_CELL_SIZE);
+    const radius = 12;
+    const maxLight = 255 * lightIntensityVal;
+    for (let dy = -radius;dy <= radius; dy++) {
+      for (let dx = -radius;dx <= radius; dx++) {
+        const lx = mlx + dx;
+        const ly = mly + dy;
+        if (lx >= 0 && lx < LIGHT_W && ly >= 0 && ly < LIGHT_H) {
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < radius) {
+            const falloff = 1 - dist / radius;
+            const intensity = maxLight * falloff * falloff;
+            const lIdx = ly * LIGHT_W + lx;
+            lightR[lIdx] = Math.max(lightR[lIdx] ?? 0, intensity);
+            lightG[lIdx] = Math.max(lightG[lIdx] ?? 0, intensity);
+            lightB[lIdx] = Math.max(lightB[lIdx] ?? 0, intensity);
+          }
+        }
+      }
+    }
+  }
+  const decay = 0.94;
+  for (let ly = 0;ly < LIGHT_H; ly++) {
+    for (let lx = 0;lx < LIGHT_W; lx++) {
+      const i = ly * LIGHT_W + lx;
+      const op = lightOpacity[i] ?? 0;
+      const att = (1 - op) * decay;
+      if (lx > 0) {
+        const left = i - 1;
+        lightR[i] = Math.max(lightR[i] ?? 0, (lightR[left] ?? 0) * att);
+        lightG[i] = Math.max(lightG[i] ?? 0, (lightG[left] ?? 0) * att);
+        lightB[i] = Math.max(lightB[i] ?? 0, (lightB[left] ?? 0) * att);
+      }
+      if (ly > 0) {
+        const up = i - LIGHT_W;
+        lightR[i] = Math.max(lightR[i] ?? 0, (lightR[up] ?? 0) * att);
+        lightG[i] = Math.max(lightG[i] ?? 0, (lightG[up] ?? 0) * att);
+        lightB[i] = Math.max(lightB[i] ?? 0, (lightB[up] ?? 0) * att);
+      }
+    }
+  }
+  for (let ly = LIGHT_H - 1;ly >= 0; ly--) {
+    for (let lx = LIGHT_W - 1;lx >= 0; lx--) {
+      const i = ly * LIGHT_W + lx;
+      const op = lightOpacity[i] ?? 0;
+      const att = (1 - op) * decay;
+      if (lx < LIGHT_W - 1) {
+        const right = i + 1;
+        lightR[i] = Math.max(lightR[i] ?? 0, (lightR[right] ?? 0) * att);
+        lightG[i] = Math.max(lightG[i] ?? 0, (lightG[right] ?? 0) * att);
+        lightB[i] = Math.max(lightB[i] ?? 0, (lightB[right] ?? 0) * att);
+      }
+      if (ly < LIGHT_H - 1) {
+        const down = i + LIGHT_W;
+        lightR[i] = Math.max(lightR[i] ?? 0, (lightR[down] ?? 0) * att);
+        lightG[i] = Math.max(lightG[i] ?? 0, (lightG[down] ?? 0) * att);
+        lightB[i] = Math.max(lightB[i] ?? 0, (lightB[down] ?? 0) * att);
+      }
+    }
+  }
+}
+function drawBrush() {
+  if (!isMouseDown)
+    return;
+  const canvasX = mouseX;
+  const canvasY = mouseY;
+  if (canvasX < 0 || canvasX >= CANVAS_WIDTH || canvasY < 0 || canvasY >= CANVAS_HEIGHT) {
+    return;
+  }
+  const px = Math.floor(canvasX / CELL_SIZE);
+  const py = Math.floor(canvasY / CELL_SIZE);
+  const radius = brushSize;
+  const isErase = currentTool === "erase";
+  for (let dy = -radius;dy <= radius; dy++) {
+    for (let dx = -radius;dx <= radius; dx++) {
+      const targetX = px + dx;
+      const targetY = py + dy;
+      if (targetX >= 0 && targetX < WIDTH && targetY >= 0 && targetY < HEIGHT) {
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= radius) {
+          const idx = targetY * WIDTH + targetX;
+          if (isErase) {
+            setCell(targetX, targetY, 0 /* EMPTY */);
+          } else {
+            if (brushStyle === "spray") {
+              if (Math.random() < 0.15) {
+                if (types[idx] === 0 /* EMPTY */ || types[idx] === 2 /* WATER */ || types[idx] === 6 /* STEAM */) {
+                  setCell(targetX, targetY, currentMaterial);
+                }
+              }
+            } else {
+              if (currentMaterial === 3 /* STONE */ || types[idx] !== 3 /* STONE */) {
+                setCell(targetX, targetY, currentMaterial);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+function render(ctx, lightCtx, lightCanvas) {
+  const renderStart = performance.now();
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  const lerpSpeed = 0.24;
+  for (let i = 0;i < WIDTH * HEIGHT; i++) {
+    const type = types[i];
+    if (type !== 0 /* EMPTY */) {
+      const gx = i % WIDTH;
+      const gy = Math.floor(i / WIDTH);
+      const vx = visualX[i] ?? gx;
+      const vy = visualY[i] ?? gy;
+      visualX[i] = vx + (gx - vx) * lerpSpeed;
+      visualY[i] = vy + (gy - vy) * lerpSpeed;
+      if (Math.abs((visualX[i] ?? gx) - gx) < 0.005)
+        visualX[i] = gx;
+      if (Math.abs((visualY[i] ?? gy) - gy) < 0.005)
+        visualY[i] = gy;
+    }
+  }
+  const drawAO = renderMode === "normal" || renderMode === "ao-only";
+  const elementTypesToDraw = [
+    3 /* STONE */,
+    1 /* SAND */,
+    2 /* WATER */,
+    4 /* MOSS */,
+    5 /* LAVA */,
+    6 /* STEAM */
+  ];
+  for (const drawType of elementTypesToDraw) {
+    const shadeBuckets = [];
+    for (let y = 0;y < HEIGHT; y++) {
+      for (let x = 0;x < WIDTH; x++) {
+        const i = y * WIDTH + x;
+        if (types[i] === drawType) {
+          let r = colorsR[i] ?? 0;
+          let g = colorsG[i] ?? 0;
+          let b = colorsB[i] ?? 0;
+          if (drawAO) {
+            let neighborCount = 0;
+            for (let ny = -1;ny <= 1; ny++) {
+              for (let nx = -1;nx <= 1; nx++) {
+                if (nx === 0 && ny === 0)
+                  continue;
+                const gx = x + nx;
+                const gy = y + ny;
+                if (gx >= 0 && gx < WIDTH && gy >= 0 && gy < HEIGHT) {
+                  if (types[gy * WIDTH + gx] !== 0 /* EMPTY */) {
+                    neighborCount++;
+                  }
+                }
+              }
+            }
+            const aoFactor = 1 - neighborCount / 8 * 0.28;
+            r = Math.floor(r * aoFactor);
+            g = Math.floor(g * aoFactor);
+            b = Math.floor(b * aoFactor);
+          }
+          const vx = visualX[i] ?? x;
+          const vy = visualY[i] ?? y;
+          const qr = Math.round(r / 15) * 15;
+          const qg = Math.round(g / 15) * 15;
+          const qb = Math.round(b / 15) * 15;
+          let bucket = shadeBuckets.find((b2) => b2.r === qr && b2.g === qg && b2.b === qb);
+          if (!bucket) {
+            bucket = { r: qr, g: qg, b: qb, cells: [] };
+            shadeBuckets.push(bucket);
+          }
+          bucket.cells.push({ x: vx, y: vy });
+        }
+      }
+    }
+    for (const bucket of shadeBuckets) {
+      ctx.beginPath();
+      for (const pt of bucket.cells) {
+        ctx.rect(pt.x * CELL_SIZE, pt.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
+      let alpha = 1;
+      if (drawType === 6 /* STEAM */) {
+        alpha = 0.38;
+      } else if (drawType === 2 /* WATER */) {
+        alpha = 0.72;
+      }
+      ctx.fillStyle = `rgba(${bucket.r}, ${bucket.g}, ${bucket.b}, ${alpha})`;
+      ctx.fill();
+    }
+  }
+  if (renderMode === "normal" || renderMode === "lighting-only") {
+    const imgData = lightCtx.createImageData(LIGHT_W, LIGHT_H);
+    for (let i = 0;i < LIGHT_W * LIGHT_H; i++) {
+      const idx = i * 4;
+      imgData.data[idx] = Math.min(255, Math.floor(lightR[i] ?? 0));
+      imgData.data[idx + 1] = Math.min(255, Math.floor(lightG[i] ?? 0));
+      imgData.data[idx + 2] = Math.min(255, Math.floor(lightB[i] ?? 0));
+      imgData.data[idx + 3] = 255;
+    }
+    lightCtx.putImageData(imgData, 0, 0);
+    if (renderMode === "lighting-only") {
+      ctx.save();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.drawImage(lightCanvas, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.globalCompositeOperation = "multiply";
+      ctx.drawImage(lightCanvas, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.restore();
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      ctx.beginPath();
+      let hasEmissive = false;
+      for (let y = 0;y < HEIGHT; y++) {
+        for (let x = 0;x < WIDTH; x++) {
+          const i = y * WIDTH + x;
+          const type = types[i];
+          if (type === 5 /* LAVA */) {
+            ctx.rect((visualX[i] ?? x) * CELL_SIZE, (visualY[i] ?? y) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            hasEmissive = true;
+          }
+        }
+      }
+      if (hasEmissive) {
+        ctx.fillStyle = "rgba(255, 60, 0, 0.4)";
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  if (mouseX >= 0 && mouseX < CANVAS_WIDTH && mouseY >= 0 && mouseY < CANVAS_HEIGHT) {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(mouseX, mouseY, brushSize * CELL_SIZE, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  renderMs = performance.now() - renderStart;
+}
+function countParticles() {
+  let count = 0;
+  for (let i = 0;i < WIDTH * HEIGHT; i++) {
+    if (types[i] !== 0 /* EMPTY */)
+      count++;
+  }
+  return count;
+}
+function loadPreset(presetName) {
+  initGrid();
+  switch (presetName) {
+    case "moss-cave":
+      for (let x = 0;x < WIDTH; x++) {
+        const depth = 15 + Math.floor(Math.sin(x * 0.1) * 8);
+        for (let y = 0;y < depth; y++) {
+          setCell(x, y, 3 /* STONE */);
+          if (y >= depth - 3) {
+            setCell(x, y, 4 /* MOSS */);
+          }
+        }
+        const floorH = HEIGHT - (10 + Math.floor(Math.cos(x * 0.08) * 6));
+        for (let y = floorH;y < HEIGHT; y++) {
+          setCell(x, y, 3 /* STONE */);
+          if (y <= floorH + 2) {
+            setCell(x, y, 4 /* MOSS */);
+          }
+        }
+      }
+      createStoneArch(35, 60, 20, 10);
+      createStoneArch(100, 80, 25, 12);
+      createStoneArch(160, 65, 18, 9);
+      for (let i = 0;i < WIDTH * HEIGHT; i++) {
+        if (types[i] === 3 /* STONE */) {
+          const x = i % WIDTH;
+          const y = Math.floor(i / WIDTH);
+          let nextToEmpty = false;
+          const dirs = [
+            [0, 1],
+            [0, -1],
+            [1, 0],
+            [-1, 0]
+          ];
+          for (const [dx, dy] of dirs) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+              if (types[ny * WIDTH + nx] === 0 /* EMPTY */) {
+                nextToEmpty = true;
+                break;
+              }
+            }
+          }
+          if (nextToEmpty && Math.random() < 0.4) {
+            types[i] = 4 /* MOSS */;
+            setElementColor(i, 4 /* MOSS */);
+          }
+        }
+      }
+      for (let x = 20;x < WIDTH; x += 30) {
+        setCell(x, 15, 2 /* WATER */);
+        setCell(x + 1, 15, 2 /* WATER */);
+      }
+      for (let x = 85;x < 115; x++) {
+        for (let y = HEIGHT - 30;y < HEIGHT - 15; y++) {
+          if (types[y * WIDTH + x] === 0 /* EMPTY */ || types[y * WIDTH + x] === 4 /* MOSS */) {
+            setCell(x, y, 2 /* WATER */);
+          }
+        }
+      }
+      for (let x = 90;x < 110; x += 3) {
+        setCell(x, HEIGHT - 35, 6 /* STEAM */);
+      }
+      break;
+    case "water-cycle":
+      for (let y = 0;y < HEIGHT; y++) {
+        for (let x = 0;x < WIDTH; x++) {
+          if (x < 6 || x >= WIDTH - 6 || y < 6 || y >= HEIGHT - 6) {
+            setCell(x, y, 3 /* STONE */);
+          }
+        }
+      }
+      for (let y = HEIGHT - 20;y < HEIGHT - 6; y++) {
+        for (let x = 6;x < WIDTH - 6; x++) {
+          setCell(x, y, 5 /* LAVA */);
+        }
+      }
+      for (let x = 6;x < WIDTH - 6; x++) {
+        setCell(x, HEIGHT - 21, 3 /* STONE */);
+        setCell(x, HEIGHT - 22, 3 /* STONE */);
+      }
+      for (let x = 85;x < 115; x++) {
+        setCell(x, HEIGHT - 21, 0 /* EMPTY */);
+        setCell(x, HEIGHT - 22, 0 /* EMPTY */);
+      }
+      for (let y = HEIGHT - 45;y < HEIGHT - 22; y++) {
+        for (let x = 12;x < WIDTH - 12; x++) {
+          setCell(x, y, 2 /* WATER */);
+        }
+      }
+      for (let x = 20;x < WIDTH - 20; x += 15) {
+        const hLength = 12 + Math.floor(Math.random() * 12);
+        for (let y = 6;y < 6 + hLength; y++) {
+          setCell(x, y, 3 /* STONE */);
+          setCell(x - 1, y - 2, 3 /* STONE */);
+          setCell(x + 1, y - 2, 3 /* STONE */);
+        }
+      }
+      break;
+    case "lava-fissure":
+      for (let y = 40;y < HEIGHT; y++) {
+        const leftLimit = Math.floor((y - 40) * 1);
+        const rightLimit = WIDTH - Math.floor((y - 40) * 1);
+        for (let x = 0;x < leftLimit; x++) {
+          setCell(x, y, 3 /* STONE */);
+        }
+        for (let x = rightLimit;x < WIDTH; x++) {
+          setCell(x, y, 3 /* STONE */);
+        }
+      }
+      createStoneArch(60, 75, 15, 8);
+      createStoneArch(100, 95, 20, 10);
+      createStoneArch(140, 75, 15, 8);
+      for (let x = 0;x < 40; x++) {
+        setCell(x, HEIGHT - 12, 4 /* MOSS */);
+      }
+      for (let x = WIDTH - 40;x < WIDTH; x++) {
+        setCell(x, HEIGHT - 12, 4 /* MOSS */);
+      }
+      for (let y = 15;y < 35; y++) {
+        for (let x = 90;x < 110; x++) {
+          if (Math.sqrt((x - 100) * (x - 100) + (y - 25) * (y - 25)) < 8) {
+            setCell(x, y, 5 /* LAVA */);
+          }
+        }
+      }
+      for (let y = 10;y < 20; y++) {
+        setCell(15, y, 2 /* WATER */);
+        setCell(WIDTH - 15, y, 2 /* WATER */);
+      }
+      for (let y = 30;y < 38; y++) {
+        for (let x = 5;x < 25; x++) {
+          setCell(x, y, 1 /* SAND */);
+        }
+        for (let x = WIDTH - 25;x < WIDTH - 5; x++) {
+          setCell(x, y, 1 /* SAND */);
+        }
+      }
+      break;
+    case "stone-collapse":
+      for (let x = 0;x < WIDTH; x++) {
+        setCell(x, HEIGHT - 5, 3 /* STONE */);
+      }
+      createStoneBlock(15, 40, 30, 8);
+      for (let y = 25;y < 40; y++) {
+        for (let x = 18;x < 42; x++) {
+          setCell(x, y, 1 /* SAND */);
+        }
+      }
+      createStoneBlock(155, 40, 30, 8);
+      for (let y = 22;y < 40; y++) {
+        for (let x = 158;x < 182; x++) {
+          setCell(x, y, 2 /* WATER */);
+        }
+      }
+      createStoneArch(100, 110, 45, 12);
+      createStoneBlock(85, 60, 30, 15);
+      for (let y = 35;y < 60; y++) {
+        for (let x = 90;x < 110; x++) {
+          setCell(x, y, 1 /* SAND */);
+        }
+      }
+      setCell(100, 10, 5 /* LAVA */);
+      setCell(101, 10, 5 /* LAVA */);
+      break;
+  }
+}
+function createStoneArch(centerX, centerY, radius, thickness) {
+  for (let y = centerY - radius;y < centerY + thickness; y++) {
+    for (let x = centerX - radius - thickness;x < centerX + radius + thickness; x++) {
+      const dist = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+      if (dist >= radius && dist < radius + thickness && y <= centerY) {
+        setCell(x, y, 3 /* STONE */);
+      }
+    }
+  }
+}
+function createStoneBlock(startX, startY, w, h) {
+  for (let y = startY;y < startY + h; y++) {
+    for (let x = startX;x < startX + w; x++) {
+      setCell(x, y, 3 /* STONE */);
+    }
+  }
+}
+window.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const lightCanvas = document.createElement("canvas");
+  lightCanvas.width = LIGHT_W;
+  lightCanvas.height = LIGHT_H;
+  const lightCtx = lightCanvas.getContext("2d");
+  initGrid();
+  loadPreset("moss-cave");
+  const hudFps = document.getElementById("hud-fps");
+  const hudParticles = document.getElementById("hud-particles");
+  const hudPhysicsMs = document.getElementById("hud-physics-ms");
+  const hudRenderMs = document.getElementById("hud-render-ms");
+  const btnPlayPause = document.getElementById("btn-play-pause");
+  const iconPlay = document.getElementById("icon-play");
+  const iconPause = document.getElementById("icon-pause");
+  const btnStep = document.getElementById("btn-step");
+  const btnClear = document.getElementById("btn-clear");
+  const valBrushSize = document.getElementById("val-brush-size");
+  const sliderBrushSize = document.getElementById("slider-brush-size");
+  const brushRound = document.getElementById("brush-round");
+  const brushSpray = document.getElementById("brush-spray");
+  const valGravity = document.getElementById("val-gravity");
+  const sliderGravity = document.getElementById("slider-gravity");
+  const valMossGrowth = document.getElementById("val-moss-growth");
+  const sliderMossGrowth = document.getElementById("slider-moss-growth");
+  const toggleFlashlightInput = document.getElementById("toggle-flashlight");
+  const toggleSunlightInput = document.getElementById("toggle-sunlight");
+  const valLightIntensity = document.getElementById("val-light-intensity");
+  const sliderLightIntensity = document.getElementById("slider-light-intensity");
+  const selectRenderMode = document.getElementById("select-render-mode");
+  const materialsGrid = document.getElementById("materials-grid");
+  const presetButtons = document.querySelectorAll(".btn-preset");
+  const tooltip = document.getElementById("tooltip");
+  const tooltipTitle = document.getElementById("tooltip-title");
+  const tooltipDesc = document.getElementById("tooltip-desc");
+  const materialDescriptions = {
+    sand: {
+      title: "Sand",
+      desc: "Granular powder that falls straight down and slides sideways to stack into piles. Sinks in water and melts into lava."
+    },
+    water: {
+      title: "Water",
+      desc: "Transparent low-viscosity fluid. Rushes downwards, rolls over edges, and fills up empty hollows. Evaporates on lava contact."
+    },
+    stone: {
+      title: "Stone",
+      desc: "Immobile solid rock structures. If completely unsupported, the entire connected chunk collapses as a rigid body."
+    },
+    moss: {
+      title: "Moss",
+      desc: "Bioluminescent green moss. Spreads slowly along solid surfaces and expands aggressively if fed with water. Burns easily."
+    },
+    lava: {
+      title: "Lava",
+      desc: "Blazing hot, highly viscous fluid. Melts sand and stone slowly, ignites moss, and instantly converts water to steam."
+    },
+    steam: {
+      title: "Steam",
+      desc: "Fading, buoyant gas that rises upwards. Sinks through water, slowly diffuses, and condenses to water when blocking stone."
+    }
+  };
+  materialsGrid.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-material");
+    if (!btn)
+      return;
+    materialsGrid.querySelectorAll(".btn-material").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    const matName = btn.getAttribute("data-material");
+    currentTool = "draw";
+    document.getElementById("tool-draw").classList.add("active");
+    document.getElementById("tool-erase").classList.remove("active");
+    switch (matName) {
+      case "sand":
+        currentMaterial = 1 /* SAND */;
+        break;
+      case "water":
+        currentMaterial = 2 /* WATER */;
+        break;
+      case "stone":
+        currentMaterial = 3 /* STONE */;
+        break;
+      case "moss":
+        currentMaterial = 4 /* MOSS */;
+        break;
+      case "lava":
+        currentMaterial = 5 /* LAVA */;
+        break;
+      case "steam":
+        currentMaterial = 6 /* STEAM */;
+        break;
+    }
+  });
+  materialsGrid.querySelectorAll(".btn-material").forEach((btn) => {
+    btn.addEventListener("mouseenter", () => {
+      const mat = btn.getAttribute("data-material");
+      const info = materialDescriptions[mat];
+      if (!info)
+        return;
+      tooltipTitle.textContent = info.title;
+      tooltipDesc.textContent = info.desc;
+      tooltip.style.display = "block";
+      const rect = btn.getBoundingClientRect();
+      tooltip.style.left = `${rect.right + 12}px`;
+      tooltip.style.top = `${rect.top}px`;
+    });
+    btn.addEventListener("mouseleave", () => {
+      tooltip.style.display = "none";
+    });
+  });
+  document.getElementById("tool-draw").addEventListener("click", () => {
+    currentTool = "draw";
+    document.getElementById("tool-draw").classList.add("active");
+    document.getElementById("tool-erase").classList.remove("active");
+  });
+  document.getElementById("tool-erase").addEventListener("click", () => {
+    currentTool = "erase";
+    document.getElementById("tool-erase").classList.add("active");
+    document.getElementById("tool-draw").classList.remove("active");
+  });
+  presetButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const preset = btn.getAttribute("data-preset");
+      loadPreset(preset);
+    });
+  });
+  btnPlayPause.addEventListener("click", () => {
+    isPaused = !isPaused;
+    if (isPaused) {
+      btnPlayPause.classList.remove("active");
+      iconPause.style.display = "none";
+      iconPlay.style.display = "block";
+    } else {
+      btnPlayPause.classList.add("active");
+      iconPlay.style.display = "none";
+      iconPause.style.display = "block";
+    }
+  });
+  btnStep.addEventListener("click", () => {
+    updatePhysics();
+  });
+  btnClear.addEventListener("click", () => {
+    initGrid();
+  });
+  const speedButtons = [
+    { id: "btn-speed-1x", val: 1 },
+    { id: "btn-speed-2x", val: 2 },
+    { id: "btn-speed-4x", val: 4 }
+  ];
+  speedButtons.forEach((sb) => {
+    const el = document.getElementById(sb.id);
+    el.addEventListener("click", () => {
+      speedButtons.forEach((x) => document.getElementById(x.id).classList.remove("active"));
+      el.classList.add("active");
+      simSpeed = sb.val;
+    });
+  });
+  sliderBrushSize.addEventListener("input", () => {
+    brushSize = parseInt(sliderBrushSize.value);
+    valBrushSize.textContent = brushSize.toString();
+  });
+  brushRound.addEventListener("click", () => {
+    brushStyle = "round";
+    brushRound.classList.add("active");
+    brushSpray.classList.remove("active");
+  });
+  brushSpray.addEventListener("click", () => {
+    brushStyle = "spray";
+    brushSpray.classList.add("active");
+    brushRound.classList.remove("active");
+  });
+  sliderGravity.addEventListener("input", () => {
+    gravityForce = parseFloat(sliderGravity.value);
+    valGravity.textContent = gravityForce.toFixed(1);
+  });
+  sliderMossGrowth.addEventListener("input", () => {
+    const val = parseInt(sliderMossGrowth.value);
+    mossGrowthRate = val / 100;
+    valMossGrowth.textContent = `${val}%`;
+  });
+  toggleFlashlightInput.addEventListener("change", () => {
+    toggleFlashlight = toggleFlashlightInput.checked;
+  });
+  toggleSunlightInput.addEventListener("change", () => {
+    toggleSunlight = toggleSunlightInput.checked;
+  });
+  sliderLightIntensity.addEventListener("input", () => {
+    lightIntensityVal = parseFloat(sliderLightIntensity.value);
+    valLightIntensity.textContent = lightIntensityVal.toFixed(1);
+  });
+  selectRenderMode.addEventListener("change", () => {
+    renderMode = selectRenderMode.value;
+  });
+  function updateMouseCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = (e.clientX - rect.left) / rect.width * CANVAS_WIDTH;
+    mouseY = (e.clientY - rect.top) / rect.height * CANVAS_HEIGHT;
+  }
+  canvas.addEventListener("mousedown", (e) => {
+    isMouseDown = true;
+    updateMouseCoordinates(e);
+    drawBrush();
+  });
+  canvas.addEventListener("mousemove", (e) => {
+    updateMouseCoordinates(e);
+    if (isMouseDown) {
+      drawBrush();
+    }
+  });
+  window.addEventListener("mouseup", () => {
+    isMouseDown = false;
+  });
+  canvas.addEventListener("mouseleave", () => {
+    mouseX = -1000;
+    mouseY = -1000;
+  });
+  window.addEventListener("keydown", (e) => {
+    const key = e.key.toLowerCase();
+    if (key === " ") {
+      btnPlayPause.click();
+      e.preventDefault();
+    } else if (key === "s") {
+      btnStep.click();
+    } else if (key === "c") {
+      btnClear.click();
+    } else if (key >= "1" && key <= "6") {
+      const btns = materialsGrid.querySelectorAll(".btn-material");
+      const num = parseInt(key) - 1;
+      if (num < btns.length) {
+        btns[num].click();
+      }
+    }
+  });
+  function loop() {
+    let physTime = 0;
+    if (!isPaused) {
+      const physStart = performance.now();
+      for (let s = 0;s < simSpeed; s++) {
+        updatePhysics();
+      }
+      physTime = performance.now() - physStart;
+    }
+    updateLighting();
+    render(ctx, lightCtx, lightCanvas);
+    fpsCount++;
+    const now = performance.now();
+    if (now - lastTime >= 1000) {
+      currentFps = Math.round(fpsCount * 1000 / (now - lastTime));
+      fpsCount = 0;
+      lastTime = now;
+      hudFps.textContent = currentFps.toString();
+      hudParticles.textContent = countParticles().toString();
+      hudPhysicsMs.textContent = `${physTime.toFixed(1)}ms`;
+      hudRenderMs.textContent = `${renderMs.toFixed(1)}ms`;
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+});
+</script></body>
+</html>
